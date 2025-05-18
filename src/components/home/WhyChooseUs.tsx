@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Shield, RefreshCw, Clock, Server, Lock, HeadphonesMic } from 'lucide-react';
+import { Shield, RefreshCw, Clock, Server, Lock, Headphones } from 'lucide-react';
 
 const features = [
   {
@@ -31,7 +31,7 @@ const features = [
   {
     title: 'Live Support',
     description: 'Get help when you need it with our 24/7 expert customer support team.',
-    icon: <HeadphonesMic className="h-10 w-10 text-kahf-blue" />,
+    icon: <Headphones className="h-10 w-10 text-kahf-blue" />,
   },
 ];
 
