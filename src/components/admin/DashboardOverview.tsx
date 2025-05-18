@@ -1,8 +1,14 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, Globe, Server, AlertCircle, UserPlus, Plus } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 const statCards = [
   {
@@ -13,7 +19,7 @@ const statCards = [
     action: {
       text: 'Add Client',
       icon: <UserPlus className="h-4 w-4 mr-1" />,
-      link: '/admin/clients/new'
+      type: 'client'
     }
   },
   {
@@ -24,7 +30,7 @@ const statCards = [
     action: {
       text: 'Add Domain',
       icon: <Plus className="h-4 w-4 mr-1" />,
-      link: '/admin/orders/domains/new'
+      type: 'domain'
     }
   },
   {
@@ -35,7 +41,7 @@ const statCards = [
     action: {
       text: 'Add Hosting',
       icon: <Plus className="h-4 w-4 mr-1" />,
-      link: '/admin/orders/hostings/new'
+      type: 'hosting'
     }
   },
   {
@@ -46,13 +52,14 @@ const statCards = [
     action: {
       text: 'View All',
       icon: null,
-      link: '/admin/orders'
+      type: 'view'
     }
   },
 ];
 
 const recentActivity = [
   {
+    id: 1,
     client: 'Acme Corporation',
     type: 'Domain',
     domain: 'acmecorp.com',
@@ -60,6 +67,7 @@ const recentActivity = [
     status: 'Active',
   },
   {
+    id: 2,
     client: 'Globex Inc',
     type: 'Hosting',
     domain: 'Premium Hosting',
@@ -67,6 +75,7 @@ const recentActivity = [
     status: 'Active',
   },
   {
+    id: 3,
     client: 'Stark Industries',
     type: 'Domain',
     domain: 'starkindustries.com',
@@ -74,6 +83,7 @@ const recentActivity = [
     status: 'Expiring',
   },
   {
+    id: 4,
     client: 'Wayne Enterprises',
     type: 'Bundle',
     domain: 'wayneenterprises.com',
@@ -83,6 +93,32 @@ const recentActivity = [
 ];
 
 const DashboardOverview = () => {
+  const [dialogType, setDialogType] = useState<string | null>(null);
+  const [viewItemId, setViewItemId] = useState<number | null>(null);
+
+  const handleActionClick = (type: string) => {
+    setDialogType(type);
+  };
+
+  const handleViewClick = (id: number) => {
+    setViewItemId(id);
+    setDialogType('view-activity');
+  };
+
+  const handleCloseDialog = () => {
+    setDialogType(null);
+    setViewItemId(null);
+  };
+
+  const handleAddItem = (type: string) => {
+    toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} added successfully!`);
+    handleCloseDialog();
+  };
+
+  const getActivityDetail = () => {
+    return recentActivity.find(activity => activity.id === viewItemId);
+  };
+
   return (
     <div>
       <div className="mb-8">
@@ -104,11 +140,14 @@ const DashboardOverview = () => {
                 <p className="text-3xl font-bold">{card.value}</p>
                 <p className="text-sm text-gray-500">{card.change}</p>
               </div>
-              <Button variant="outline" size="sm" className="w-full mt-4" asChild>
-                <a href={card.action.link} className="flex items-center justify-center">
-                  {card.action.icon}
-                  {card.action.text}
-                </a>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full mt-4"
+                onClick={() => handleActionClick(card.action.type)}
+              >
+                {card.action.icon}
+                {card.action.text}
               </Button>
             </CardContent>
           </Card>
@@ -151,7 +190,13 @@ const DashboardOverview = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                      <Button variant="ghost" size="sm">View</Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleViewClick(activity.id)}
+                      >
+                        View
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -160,6 +205,197 @@ const DashboardOverview = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Add Client Dialog */}
+      <Dialog open={dialogType === 'client'} onOpenChange={() => handleCloseDialog()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Client</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Client Name</Label>
+              <Input id="name" placeholder="e.g. Acme Corporation" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input id="email" type="email" placeholder="client@example.com" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input id="phone" placeholder="+1 (555) 123-4567" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="address">Address</Label>
+              <Textarea id="address" placeholder="Client's address" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseDialog}>Cancel</Button>
+            <Button onClick={() => handleAddItem('client')}>Add Client</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Domain Dialog */}
+      <Dialog open={dialogType === 'domain'} onOpenChange={() => handleCloseDialog()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Domain</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="domainName">Domain Name</Label>
+              <Input id="domainName" placeholder="example.com" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="client">Client</Label>
+              <Select>
+                <SelectTrigger id="client">
+                  <SelectValue placeholder="Select client" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="acme">Acme Corporation</SelectItem>
+                  <SelectItem value="globex">Globex Inc</SelectItem>
+                  <SelectItem value="stark">Stark Industries</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="registrationDate">Registration Date</Label>
+              <Input id="registrationDate" type="date" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="expiryDate">Expiry Date</Label>
+              <Input id="expiryDate" type="date" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea id="notes" placeholder="Additional notes about this domain" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseDialog}>Cancel</Button>
+            <Button onClick={() => handleAddItem('domain')}>Add Domain</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Hosting Dialog */}
+      <Dialog open={dialogType === 'hosting'} onOpenChange={() => handleCloseDialog()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Hosting</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="hostingPlan">Hosting Plan</Label>
+              <Select>
+                <SelectTrigger id="hostingPlan">
+                  <SelectValue placeholder="Select hosting plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="basic">Basic Hosting</SelectItem>
+                  <SelectItem value="premium">Premium Hosting</SelectItem>
+                  <SelectItem value="business">Business Hosting</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="hostingClient">Client</Label>
+              <Select>
+                <SelectTrigger id="hostingClient">
+                  <SelectValue placeholder="Select client" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="acme">Acme Corporation</SelectItem>
+                  <SelectItem value="globex">Globex Inc</SelectItem>
+                  <SelectItem value="stark">Stark Industries</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="domain">Associated Domain</Label>
+              <Select>
+                <SelectTrigger id="domain">
+                  <SelectValue placeholder="Select domain" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="acmecorp.com">acmecorp.com</SelectItem>
+                  <SelectItem value="globex.com">globex.com</SelectItem>
+                  <SelectItem value="stark.com">stark.com</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="startDate">Start Date</Label>
+              <Input id="startDate" type="date" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="endDate">End Date</Label>
+              <Input id="endDate" type="date" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseDialog}>Cancel</Button>
+            <Button onClick={() => handleAddItem('hosting')}>Add Hosting</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Activity Dialog */}
+      <Dialog open={dialogType === 'view-activity'} onOpenChange={() => handleCloseDialog()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Activity Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {viewItemId && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500">Client</p>
+                    <p className="font-medium">{getActivityDetail()?.client}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Type</p>
+                    <p className="font-medium">{getActivityDetail()?.type}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Domain/Service</p>
+                    <p className="font-medium">{getActivityDetail()?.domain}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Date</p>
+                    <p className="font-medium">{getActivityDetail()?.date}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Status</p>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      getActivityDetail()?.status === 'Active'
+                        ? 'bg-green-100 text-green-800'
+                        : getActivityDetail()?.status === 'Expiring'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {getActivityDetail()?.status}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="border-t pt-4">
+                  <p className="text-sm text-gray-500 mb-2">Additional Information</p>
+                  <p>This is a detailed view of the {getActivityDetail()?.type.toLowerCase()} activity for {getActivityDetail()?.client}.</p>
+                  <p className="mt-2">You can add more details or actions related to this activity here.</p>
+                </div>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={handleCloseDialog}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

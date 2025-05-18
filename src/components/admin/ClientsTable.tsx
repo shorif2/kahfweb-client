@@ -24,6 +24,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Edit, MoreHorizontal, Plus, User, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -35,7 +37,9 @@ const initialClients = [
     email: 'info@globexinc.com',
     mobile: '+1 (555) 234-5678',
     domains: 1,
-    hostings: 1
+    hostings: 1,
+    address: '123 Corporate Park, Business City, BC 10001',
+    notes: 'Premium client with special pricing arrangements.',
   },
   { 
     id: 2, 
@@ -43,7 +47,9 @@ const initialClients = [
     email: 'info@acmecorp.com', 
     mobile: '+1 (555) 987-6543',
     domains: 2,
-    hostings: 1
+    hostings: 1,
+    address: '789 Industrial Blvd, Metro City, MC 20002',
+    notes: 'Long-standing client since 2018.',
   },
   { 
     id: 3, 
@@ -51,7 +57,9 @@ const initialClients = [
     email: 'tony@starkindustries.com',
     mobile: '+1 (555) 123-4567',
     domains: 3,
-    hostings: 2
+    hostings: 2,
+    address: '555 Tech Avenue, Innovation City, IC 30003',
+    notes: 'Priority support client.',
   },
   { 
     id: 4, 
@@ -59,7 +67,9 @@ const initialClients = [
     email: 'bruce@wayneenterprises.com',
     mobile: '+1 (555) 456-7890',
     domains: 1,
-    hostings: 1
+    hostings: 1,
+    address: '1 Corporate Plaza, Gotham City, GC 40004',
+    notes: 'Interested in expanding to additional services.',
   },
   { 
     id: 5, 
@@ -67,7 +77,9 @@ const initialClients = [
     email: 'michael@dundermifflin.com',
     mobile: '+1 (555) 888-9999',
     domains: 1,
-    hostings: 0
+    hostings: 0,
+    address: '1725 Slough Avenue, Scranton, PA 50005',
+    notes: 'Paper company looking to expand their web presence.',
   },
 ];
 
@@ -75,7 +87,11 @@ const ClientsTable = () => {
   const [clients, setClients] = useState(initialClients);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<number | null>(null);
+  const [currentClient, setCurrentClient] = useState<any>(null);
+  const [editFormData, setEditFormData] = useState<any>(null);
 
   // Filter clients based on search query
   const filteredClients = clients.filter(client => {
@@ -102,15 +118,33 @@ const ClientsTable = () => {
   };
 
   const handleViewClient = (clientId: number) => {
-    toast('View client details (not implemented in demo)', {
-      description: `ID: ${clientId}`
-    });
+    const client = clients.find(c => c.id === clientId);
+    setCurrentClient(client);
+    setIsViewDialogOpen(true);
   };
 
   const handleEditClient = (clientId: number) => {
-    toast('Edit client (not implemented in demo)', {
-      description: `ID: ${clientId}`
-    });
+    const client = clients.find(c => c.id === clientId);
+    setCurrentClient(client);
+    setEditFormData({...client});
+    setIsEditDialogOpen(true);
+  };
+
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSaveEdit = () => {
+    setClients(clients.map(client => 
+      client.id === editFormData.id ? editFormData : client
+    ));
+    toast.success('Client updated successfully');
+    setIsEditDialogOpen(false);
+    setEditFormData(null);
   };
 
   return (
@@ -198,6 +232,118 @@ const ClientsTable = () => {
           </TableBody>
         </Table>
       </div>
+
+      {/* View Client Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Client Details</DialogTitle>
+          </DialogHeader>
+          {currentClient && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-lg">{currentClient.name}</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p>{currentClient.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Phone</p>
+                  <p>{currentClient.mobile}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Address</p>
+                <p>{currentClient.address}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Domains</p>
+                  <p>{currentClient.domains}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Hostings</p>
+                  <p>{currentClient.hostings}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Notes</p>
+                <p>{currentClient.notes}</p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Client Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Client</DialogTitle>
+          </DialogHeader>
+          {editFormData && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input 
+                  id="name"
+                  name="name"
+                  value={editFormData.name}
+                  onChange={handleEditInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={editFormData.email}
+                  onChange={handleEditInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="mobile">Mobile</Label>
+                <Input 
+                  id="mobile"
+                  name="mobile"
+                  value={editFormData.mobile}
+                  onChange={handleEditInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="address">Address</Label>
+                <Textarea 
+                  id="address"
+                  name="address"
+                  value={editFormData.address}
+                  onChange={handleEditInputChange}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea 
+                  id="notes"
+                  name="notes"
+                  value={editFormData.notes}
+                  onChange={handleEditInputChange}
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveEdit}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

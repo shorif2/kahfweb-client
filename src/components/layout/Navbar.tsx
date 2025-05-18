@@ -9,19 +9,28 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, Settings } from 'lucide-react';
+import { User, LogOut, Settings, Home } from 'lucide-react';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isAuthenticated, user, logout, isAdmin } = useAuth();
 
   return (
-    <nav className="bg-white shadow-sm py-4">
+    <nav className="bg-white shadow-sm py-4 fixed top-0 left-0 right-0 z-50">
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <span className="text-2xl font-bold text-kahf-blue">KahfWeb</span>
+            <img 
+              src="https://iili.io/3PxLkSp.png" 
+              alt="KahfWeb Logo" 
+              className="h-8 w-auto mr-2"
+            />
+            <img 
+              src="https://iili.io/3PxeQTl.png" 
+              alt="KahfWeb" 
+              className="h-6 w-auto hidden sm:block"
+            />
           </Link>
 
           {/* Desktop Menu */}
@@ -37,6 +46,15 @@ const Navbar = () => {
             </Link>
             <Link to="/bundle" className="text-gray-700 hover:text-kahf-blue font-medium">
               Bundle
+            </Link>
+            <Link to="/about" className="text-gray-700 hover:text-kahf-blue font-medium">
+              About
+            </Link>
+            <Link to="/contact" className="text-gray-700 hover:text-kahf-blue font-medium">
+              Contact
+            </Link>
+            <Link to="/blog" className="text-gray-700 hover:text-kahf-blue font-medium">
+              Blog
             </Link>
           </div>
 
@@ -146,6 +164,27 @@ const Navbar = () => {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Bundle
+            </Link>
+            <Link
+              to="/about"
+              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              About
+            </Link>
+            <Link
+              to="/contact"
+              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Contact
+            </Link>
+            <Link
+              to="/blog"
+              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Blog
             </Link>
             
             {isAuthenticated ? (

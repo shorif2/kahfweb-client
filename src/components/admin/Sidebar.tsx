@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { HomeIcon, Users, ShoppingCart } from 'lucide-react';
+import { HomeIcon, Users, ShoppingCart, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const AdminSidebar = () => {
@@ -26,6 +26,11 @@ const AdminSidebar = () => {
       name: 'Orders',
       href: '/admin/orders',
       icon: <ShoppingCart size={18} />,
+    },
+    {
+      name: 'Blog',
+      href: '/admin/blog',
+      icon: <FileText size={18} />,
     },
   ];
 

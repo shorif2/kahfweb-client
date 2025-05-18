@@ -119,7 +119,7 @@ const ServiceList = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {services.map((service) => (
         <Card key={service.id} className="overflow-hidden">
           <CardHeader className="bg-gray-50 pb-2">
@@ -136,7 +136,7 @@ const ServiceList = () => {
             </div>
           </CardHeader>
           <CardContent className="pt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 gap-4 mb-4">
               <div>
                 <p className="text-sm text-gray-500">
                   {service.type === 'domain' ? 'Registration' : 'Purchase'} Date: <span className="font-medium text-gray-700">{service.registrationDate}</span>

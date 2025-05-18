@@ -1,164 +1,156 @@
 
 import React, { useState } from 'react';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { 
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Edit, MoreHorizontal, Plus, Eye, Trash2, Globe, Server } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { Edit, Eye, Plus, Search } from 'lucide-react';
 
-// Sample domain data
-const domainOrders = [
-  { 
-    id: 1, 
-    name: 'acmecorp.com', 
+// Sample order data
+const initialOrders = [
+  {
+    id: 1,
     client: 'Acme Corporation',
-    purchaseDate: '2024-05-01',
-    expiryDate: '2025-06-01',
-    provider: 'Sarah Johnson',
-    status: 'Active'
+    type: 'Domain',
+    item: 'acmecorp.com',
+    date: '2023-05-10',
+    expiry: '2024-05-10',
+    amount: 12.99,
+    status: 'Active',
+    paymentMethod: 'bKash',
+    transactionId: 'TXN123456789',
   },
-  { 
-    id: 2, 
-    name: 'starkindustries.com', 
-    client: 'Stark Industries',
-    purchaseDate: '2023-10-15',
-    expiryDate: '2024-10-15',
-    provider: 'Tony Stark',
-    status: 'Expiring Soon'
-  },
-  { 
-    id: 3, 
-    name: 'wayneenterprises.com', 
-    client: 'Wayne Enterprises',
-    purchaseDate: '2023-08-22',
-    expiryDate: '2024-08-22',
-    provider: 'Bruce Wayne',
-    status: 'Active'
-  },
-  { 
-    id: 4, 
-    name: 'globexinc.com', 
+  {
+    id: 2,
     client: 'Globex Inc',
-    purchaseDate: '2022-12-10',
-    expiryDate: '2023-12-10',
-    provider: 'Hank Scorpio',
-    status: 'Expired'
+    type: 'Hosting',
+    item: 'Premium Hosting',
+    date: '2023-05-08',
+    expiry: '2024-05-08',
+    amount: 89.99,
+    status: 'Active',
+    paymentMethod: 'Nagad',
+    transactionId: 'TXN987654321',
   },
-];
-
-// Sample hosting data
-const hostingOrders = [
-  { 
-    id: 1, 
-    name: 'Premium Web Hosting', 
-    client: 'Acme Corporation',
-    purchaseDate: '2024-05-01',
-    expiryDate: '2025-06-01',
-    provider: 'Sarah Johnson',
-    status: 'Active'
-  },
-  { 
-    id: 2, 
-    name: 'Business Hosting', 
+  {
+    id: 3,
     client: 'Stark Industries',
-    purchaseDate: '2023-10-15',
-    expiryDate: '2024-10-15',
-    provider: 'Tony Stark',
-    status: 'Expiring Soon'
+    type: 'Domain',
+    item: 'starkindustries.com',
+    date: '2023-05-05',
+    expiry: '2024-05-05',
+    amount: 14.99,
+    status: 'Pending',
+    paymentMethod: 'bKash',
+    transactionId: 'TXN456789123',
   },
-  { 
-    id: 3, 
-    name: 'Standard Hosting', 
+  {
+    id: 4,
     client: 'Wayne Enterprises',
-    purchaseDate: '2023-08-22',
-    expiryDate: '2024-08-22',
-    provider: 'Bruce Wayne',
-    status: 'Active'
+    type: 'Bundle',
+    item: 'wayneenterprises.com + Premium Hosting',
+    date: '2023-05-01',
+    expiry: '2024-05-01',
+    amount: 99.99,
+    status: 'Active',
+    paymentMethod: 'Nagad',
+    transactionId: 'TXN789123456',
   },
-  { 
-    id: 4, 
-    name: 'Basic Hosting', 
-    client: 'Globex Inc',
-    purchaseDate: '2022-12-10',
-    expiryDate: '2023-12-10',
-    provider: 'Hank Scorpio',
-    status: 'Expired'
+  {
+    id: 5,
+    client: 'Dunder Mifflin',
+    type: 'Domain',
+    item: 'dundermifflin.com',
+    date: '2023-04-25',
+    expiry: '2024-04-25',
+    amount: 12.99,
+    status: 'Pending',
+    paymentMethod: 'bKash',
+    transactionId: 'TXN321654987',
   },
 ];
 
 const OrdersTable = () => {
-  const [domains, setDomains] = useState(domainOrders);
-  const [hostings, setHostings] = useState(hostingOrders);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<{id: number, type: 'domain' | 'hosting'} | null>(null);
+  const [orders, setOrders] = useState(initialOrders);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchField, setSearchField] = useState('all');
+  const [isAddDomainDialogOpen, setIsAddDomainDialogOpen] = useState(false);
+  const [isAddHostingDialogOpen, setIsAddHostingDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [currentOrder, setCurrentOrder] = useState<any>(null);
+  const [editFormData, setEditFormData] = useState<any>(null);
 
-  const handleDeleteItem = (id: number, type: 'domain' | 'hosting') => {
-    setItemToDelete({ id, type });
-    setIsDeleteDialogOpen(true);
-  };
+  // Filter orders based on search query and field
+  const filteredOrders = orders.filter(order => {
+    const query = searchQuery.toLowerCase();
+    if (!query) return true;
 
-  const confirmDelete = () => {
-    if (itemToDelete) {
-      if (itemToDelete.type === 'domain') {
-        setDomains(domains.filter(domain => domain.id !== itemToDelete.id));
-        toast.success('Domain deleted successfully');
-      } else {
-        setHostings(hostings.filter(hosting => hosting.id !== itemToDelete.id));
-        toast.success('Hosting deleted successfully');
-      }
+    if (searchField === 'all') {
+      return (
+        order.client.toLowerCase().includes(query) ||
+        order.type.toLowerCase().includes(query) ||
+        order.item.toLowerCase().includes(query) ||
+        order.status.toLowerCase().includes(query) ||
+        order.transactionId.toLowerCase().includes(query)
+      );
+    } else if (searchField === 'client') {
+      return order.client.toLowerCase().includes(query);
+    } else if (searchField === 'type') {
+      return order.type.toLowerCase().includes(query);
+    } else if (searchField === 'item') {
+      return order.item.toLowerCase().includes(query);
+    } else if (searchField === 'status') {
+      return order.status.toLowerCase().includes(query);
+    } else if (searchField === 'transactionId') {
+      return order.transactionId.toLowerCase().includes(query);
     }
-    setIsDeleteDialogOpen(false);
-    setItemToDelete(null);
+    return true;
+  });
+
+  const handleViewOrder = (id: number) => {
+    const order = orders.find(o => o.id === id);
+    setCurrentOrder(order);
+    setIsViewDialogOpen(true);
   };
 
-  const handleViewItem = (id: number, type: 'domain' | 'hosting') => {
-    toast(`View ${type} details (not implemented in demo)`, {
-      description: `ID: ${id}`
-    });
+  const handleEditOrder = (id: number) => {
+    const order = orders.find(o => o.id === id);
+    setCurrentOrder(order);
+    setEditFormData({...order});
+    setIsEditDialogOpen(true);
   };
 
-  const handleEditItem = (id: number, type: 'domain' | 'hosting') => {
-    toast(`Edit ${type} (not implemented in demo)`, {
-      description: `ID: ${id}`
-    });
+  const handleEditInputChange = (name: string, value: string) => {
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return 'bg-green-100 text-green-800';
-      case 'Expiring Soon':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Expired':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+  const handleSaveEdit = () => {
+    setOrders(orders.map(order => 
+      order.id === editFormData.id ? editFormData : order
+    ));
+    toast.success('Order updated successfully');
+    setIsEditDialogOpen(false);
+    setEditFormData(null);
+  };
+
+  const handleAddOrder = (type: string) => {
+    toast.success(`New ${type} order added successfully`);
+    if (type === 'domain') {
+      setIsAddDomainDialogOpen(false);
+    } else if (type === 'hosting') {
+      setIsAddHostingDialogOpen(false);
     }
   };
 
@@ -167,193 +159,410 @@ const OrdersTable = () => {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-4 sm:space-y-0">
         <div>
           <h1 className="text-3xl font-bold mb-2">Orders Management</h1>
-          <p className="text-gray-600">Manage domain registrations and hosting services</p>
+          <p className="text-gray-600">Manage domain and hosting orders</p>
         </div>
-        <div className="flex gap-2">
-          <Button asChild variant="outline">
-            <a href="/admin/orders/domains/new" className="inline-flex items-center">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Domain
-            </a>
+        <div className="flex space-x-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsAddDomainDialogOpen(true)}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Domain
           </Button>
-          <Button asChild>
-            <a href="/admin/orders/hostings/new" className="inline-flex items-center">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Hosting
-            </a>
+          <Button onClick={() => setIsAddHostingDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Hosting
           </Button>
         </div>
       </div>
 
-      <Tabs defaultValue="domains">
-        <TabsList className="mb-4">
-          <TabsTrigger value="domains" className="flex items-center">
-            <Globe className="mr-2 h-4 w-4" />
-            Domains
-          </TabsTrigger>
-          <TabsTrigger value="hostings" className="flex items-center">
-            <Server className="mr-2 h-4 w-4" />
-            Hostings
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="domains" className="border rounded-md">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Domain Name</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Purchase Date</TableHead>
-                <TableHead>Expiry Date</TableHead>
-                <TableHead>Provider</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {domains.length > 0 ? (
-                domains.map((domain) => (
-                  <TableRow key={domain.id}>
-                    <TableCell className="font-medium">{domain.name}</TableCell>
-                    <TableCell>{domain.client}</TableCell>
-                    <TableCell>{domain.purchaseDate}</TableCell>
-                    <TableCell>{domain.expiryDate}</TableCell>
-                    <TableCell>{domain.provider}</TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(domain.status)}`}>
-                        {domain.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleViewItem(domain.id, 'domain')}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            <span>View</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleEditItem(domain.id, 'domain')}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            <span>Edit</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleDeleteItem(domain.id, 'domain')}
-                            className="text-red-600 focus:text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            <span>Delete</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-6">
-                    No domains found
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TabsContent>
-        
-        <TabsContent value="hostings" className="border rounded-md">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Hosting Name</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Purchase Date</TableHead>
-                <TableHead>Expiry Date</TableHead>
-                <TableHead>Provider</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {hostings.length > 0 ? (
-                hostings.map((hosting) => (
-                  <TableRow key={hosting.id}>
-                    <TableCell className="font-medium">{hosting.name}</TableCell>
-                    <TableCell>{hosting.client}</TableCell>
-                    <TableCell>{hosting.purchaseDate}</TableCell>
-                    <TableCell>{hosting.expiryDate}</TableCell>
-                    <TableCell>{hosting.provider}</TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(hosting.status)}`}>
-                        {hosting.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleViewItem(hosting.id, 'hosting')}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            <span>View</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleEditItem(hosting.id, 'hosting')}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            <span>Edit</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleDeleteItem(hosting.id, 'hosting')}
-                            className="text-red-600 focus:text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            <span>Delete</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-6">
-                    No hostings found
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TabsContent>
-      </Tabs>
+      <div className="flex flex-wrap gap-4">
+        <div className="flex-1 min-w-[200px]">
+          <Select value={searchField} onValueChange={setSearchField}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Search Field" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Fields</SelectItem>
+              <SelectItem value="client">Client</SelectItem>
+              <SelectItem value="type">Type</SelectItem>
+              <SelectItem value="item">Item</SelectItem>
+              <SelectItem value="status">Status</SelectItem>
+              <SelectItem value="transactionId">Transaction ID</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex-[3] min-w-[300px]">
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              className="pl-8"
+              type="search"
+              placeholder={`Search orders by ${searchField === 'all' ? 'any field' : searchField}...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <div className="border rounded-md bg-white overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filteredOrders.length > 0 ? (
+                filteredOrders.map((order) => (
+                  <tr key={order.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">{order.client}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{order.type}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{order.item}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{order.date}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">${order.amount.toFixed(2)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        order.status === 'Active'
+                          ? 'bg-green-100 text-green-800'
+                          : order.status === 'Pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleViewOrder(order.id)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleEditOrder(order.id)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                    No orders found matching your search criteria
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* View Order Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Order Details</DialogTitle>
+          </DialogHeader>
+          {currentOrder && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-lg">{currentOrder.item}</h3>
+                <p className="text-sm text-gray-500">{currentOrder.type}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Client</p>
+                  <p>{currentOrder.client}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Status</p>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    currentOrder.status === 'Active'
+                      ? 'bg-green-100 text-green-800'
+                      : currentOrder.status === 'Pending'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {currentOrder.status}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Order Date</p>
+                  <p>{currentOrder.date}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Expiry Date</p>
+                  <p>{currentOrder.expiry}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Amount</p>
+                  <p>${currentOrder.amount.toFixed(2)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Payment Method</p>
+                  <p>{currentOrder.paymentMethod}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Transaction ID</p>
+                <p>{currentOrder.transactionId}</p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Order Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this {itemToDelete?.type}? This action cannot be undone.
-            </DialogDescription>
+            <DialogTitle>Edit Order</DialogTitle>
           </DialogHeader>
+          {editFormData && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="client">Client</Label>
+                  <Input 
+                    id="client"
+                    value={editFormData.client}
+                    readOnly
+                    className="bg-gray-50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="type">Type</Label>
+                  <Input 
+                    id="type"
+                    value={editFormData.type}
+                    readOnly
+                    className="bg-gray-50"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="item">Item</Label>
+                <Input 
+                  id="item"
+                  value={editFormData.item}
+                  readOnly
+                  className="bg-gray-50"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="date">Order Date</Label>
+                  <Input 
+                    id="date"
+                    type="date"
+                    value={editFormData.date}
+                    readOnly
+                    className="bg-gray-50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="expiry">Expiry Date</Label>
+                  <Input 
+                    id="expiry"
+                    type="date"
+                    value={editFormData.expiry}
+                    onChange={(e) => handleEditInputChange('expiry', e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select 
+                  value={editFormData.status} 
+                  onValueChange={(value) => handleEditInputChange('status', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="Expired">Expired</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="transactionId">Transaction ID</Label>
+                <Input 
+                  id="transactionId"
+                  value={editFormData.transactionId}
+                  onChange={(e) => handleEditInputChange('transactionId', e.target.value)}
+                />
+              </div>
+            </div>
+          )}
           <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setIsDeleteDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={confirmDelete}
-            >
-              Delete
-            </Button>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveEdit}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Domain Dialog */}
+      <Dialog open={isAddDomainDialogOpen} onOpenChange={setIsAddDomainDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Domain</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="clientSelect">Client</Label>
+              <Select>
+                <SelectTrigger id="clientSelect">
+                  <SelectValue placeholder="Select client" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="acme">Acme Corporation</SelectItem>
+                  <SelectItem value="globex">Globex Inc</SelectItem>
+                  <SelectItem value="stark">Stark Industries</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="domainName">Domain Name</Label>
+              <Input id="domainName" placeholder="e.g., example.com" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="registerDate">Registration Date</Label>
+                <Input id="registerDate" type="date" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="expiryDate">Expiry Date</Label>
+                <Input id="expiryDate" type="date" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="amount">Amount</Label>
+              <Input id="amount" type="number" placeholder="12.99" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="paymentMethod">Payment Method</Label>
+              <Select>
+                <SelectTrigger id="paymentMethod">
+                  <SelectValue placeholder="Select payment method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bKash">bKash</SelectItem>
+                  <SelectItem value="Nagad">Nagad</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="transId">Transaction ID</Label>
+              <Input id="transId" placeholder="e.g., TXN123456789" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddDomainDialogOpen(false)}>Cancel</Button>
+            <Button onClick={() => handleAddOrder('domain')}>Add Domain</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Hosting Dialog */}
+      <Dialog open={isAddHostingDialogOpen} onOpenChange={setIsAddHostingDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Hosting</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="hostingClient">Client</Label>
+              <Select>
+                <SelectTrigger id="hostingClient">
+                  <SelectValue placeholder="Select client" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="acme">Acme Corporation</SelectItem>
+                  <SelectItem value="globex">Globex Inc</SelectItem>
+                  <SelectItem value="stark">Stark Industries</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="hostingPlan">Hosting Plan</Label>
+              <Select>
+                <SelectTrigger id="hostingPlan">
+                  <SelectValue placeholder="Select hosting plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="basic">Basic Hosting</SelectItem>
+                  <SelectItem value="premium">Premium Hosting</SelectItem>
+                  <SelectItem value="business">Business Hosting</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="associatedDomain">Associated Domain</Label>
+              <Select>
+                <SelectTrigger id="associatedDomain">
+                  <SelectValue placeholder="Select domain" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="acmecorp.com">acmecorp.com</SelectItem>
+                  <SelectItem value="globex.com">globex.com</SelectItem>
+                  <SelectItem value="stark.com">stark.com</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="hostingStartDate">Start Date</Label>
+                <Input id="hostingStartDate" type="date" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="hostingEndDate">End Date</Label>
+                <Input id="hostingEndDate" type="date" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="hostingAmount">Amount</Label>
+              <Input id="hostingAmount" type="number" placeholder="89.99" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="hostingPaymentMethod">Payment Method</Label>
+              <Select>
+                <SelectTrigger id="hostingPaymentMethod">
+                  <SelectValue placeholder="Select payment method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bKash">bKash</SelectItem>
+                  <SelectItem value="Nagad">Nagad</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="hostingTransId">Transaction ID</Label>
+              <Input id="hostingTransId" placeholder="e.g., TXN123456789" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddHostingDialogOpen(false)}>Cancel</Button>
+            <Button onClick={() => handleAddOrder('hosting')}>Add Hosting</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
