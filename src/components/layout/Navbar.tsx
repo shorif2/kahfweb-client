@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -14,9 +14,22 @@ import { User, LogOut, Settings, Home } from 'lucide-react';
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isAuthenticated, user, logout, isAdmin } = useAuth();
+  const location = useLocation();
+  
+  // Determine if we're in dashboard/admin area
+  const isDashboard = location.pathname.includes('/dashboard') || 
+                     location.pathname.includes('/admin') ||
+                     location.pathname === '/control-panel' ||
+                     location.pathname === '/profile';
+
+  // Handle logout - redirect to get-started page
+  const handleLogout = () => {
+    logout();
+    window.location.href = '/get-started';
+  };
 
   return (
-    <nav className="bg-white shadow-sm py-4 fixed top-0 left-0 right-0 z-50">
+    <nav className="bg-white shadow-sm py-4 fixed top-0 left-0 right-0 z-50" style={{ paddingTop: '7px', paddingBottom: '7px' }}>
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex justify-between items-center">
           {/* Logo */}
@@ -25,32 +38,39 @@ const Navbar = () => {
               src="https://iili.io/3PxeQTl.png" 
               alt="KahfWeb Logo" 
               className="h-8 w-auto"
+              style={{ maxWidth: '30%', height: 'auto' }}
             />
           </Link>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex space-x-8">
-            <Link to="/" className="text-gray-700 hover:text-kahf-blue font-medium">
-              Home
-            </Link>
-            <Link to="/domains" className="text-gray-700 hover:text-kahf-blue font-medium">
-              Domains
-            </Link>
-            <Link to="/hosting" className="text-gray-700 hover:text-kahf-blue font-medium">
-              Hosting
-            </Link>
-            <Link to="/bundle" className="text-gray-700 hover:text-kahf-blue font-medium">
-              Bundle
-            </Link>
-            <Link to="/about" className="text-gray-700 hover:text-kahf-blue font-medium">
-              About
-            </Link>
-            <Link to="/contact" className="text-gray-700 hover:text-kahf-blue font-medium">
-              Contact
-            </Link>
-            <Link to="/blog" className="text-gray-700 hover:text-kahf-blue font-medium">
-              Blog
-            </Link>
+            {isDashboard ? (
+              /* Dashboard/Admin Menu */
+              <>
+                <Link to="/" className="text-gray-700 hover:text-kahf-blue font-medium">
+                  Home
+                </Link>
+                <Link to={isAdmin ? "/admin/control-panel" : "/control-panel"} className="text-gray-700 hover:text-kahf-blue font-medium">
+                  Control Panel
+                </Link>
+              </>
+            ) : (
+              /* Public Pages Menu */
+              <>
+                <Link to="/" className="text-gray-700 hover:text-kahf-blue font-medium">
+                  Home
+                </Link>
+                <Link to="/about" className="text-gray-700 hover:text-kahf-blue font-medium">
+                  About
+                </Link>
+                <Link to="/contact" className="text-gray-700 hover:text-kahf-blue font-medium">
+                  Contact
+                </Link>
+                <Link to="/blog" className="text-gray-700 hover:text-kahf-blue font-medium">
+                  Blog
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Auth Buttons */}
@@ -76,7 +96,7 @@ const Navbar = () => {
                         Profile Settings
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={logout}>
+                    <DropdownMenuItem onClick={handleLogout}>
                       <span className="flex items-center w-full">
                         <LogOut className="h-4 w-4 mr-2" />
                         Sign Out
@@ -129,55 +149,57 @@ const Navbar = () => {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden mt-4 py-2 space-y-2 border-t border-gray-100">
-            <Link
-              to="/"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
-              to="/domains"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Domains
-            </Link>
-            <Link
-              to="/hosting"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Hosting
-            </Link>
-            <Link
-              to="/bundle"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Bundle
-            </Link>
-            <Link
-              to="/about"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              to="/contact"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Contact
-            </Link>
-            <Link
-              to="/blog"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Blog
-            </Link>
+            {isDashboard ? (
+              /* Dashboard/Admin Mobile Menu */
+              <>
+                <Link
+                  to="/"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link
+                  to={isAdmin ? "/admin/control-panel" : "/control-panel"}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Control Panel
+                </Link>
+              </>
+            ) : (
+              /* Public Pages Mobile Menu */
+              <>
+                <Link
+                  to="/"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link
+                  to="/about"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  About
+                </Link>
+                <Link
+                  to="/contact"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Contact
+                </Link>
+                <Link
+                  to="/blog"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Blog
+                </Link>
+              </>
+            )}
             
             {isAuthenticated ? (
               <>
@@ -197,7 +219,7 @@ const Navbar = () => {
                 </Link>
                 <button
                   onClick={() => {
-                    logout();
+                    handleLogout();
                     setIsMobileMenuOpen(false);
                   }}
                   className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50"
