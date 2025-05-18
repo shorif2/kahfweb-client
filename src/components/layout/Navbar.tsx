@@ -22,14 +22,9 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img 
-              src="https://iili.io/3PxLkSp.png" 
-              alt="KahfWeb Logo" 
-              className="h-8 w-auto mr-2"
-            />
-            <img 
               src="https://iili.io/3PxeQTl.png" 
-              alt="KahfWeb" 
-              className="h-6 w-auto hidden sm:block"
+              alt="KahfWeb Logo" 
+              className="h-8 w-auto"
             />
           </Link>
 
@@ -92,11 +87,8 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-2">
-                <Link to="/login">
-                  <Button variant="outline">Login</Button>
-                </Link>
-                <Link to="/signup">
-                  <Button>Sign Up</Button>
+                <Link to="/get-started">
+                  <Button>Get Started</Button>
                 </Link>
               </div>
             )}
@@ -216,16 +208,10 @@ const Navbar = () => {
             ) : (
               <div className="flex flex-col space-y-2 px-4 py-2">
                 <Link
-                  to="/login"
+                  to="/get-started"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  <Button variant="outline" className="w-full">Login</Button>
-                </Link>
-                <Link
-                  to="/signup"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Button className="w-full">Sign Up</Button>
+                  <Button className="w-full">Get Started</Button>
                 </Link>
               </div>
             )}

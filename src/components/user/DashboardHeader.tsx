@@ -10,9 +10,21 @@ const DashboardHeader = () => {
 
   const handlePurchase = (type: string) => {
     const products = {
-      'domain': { name: 'Domain Registration', price: 14.99, description: 'Register a new domain name' },
-      'hosting': { name: 'Premium Hosting (1 Year)', price: 89.99, description: 'High performance web hosting with unlimited bandwidth' },
-      'bundle': { name: 'Hosting + Domain Bundle', price: 99.99, description: 'Domain registration with premium hosting package' }
+      'domain': { 
+        name: 'Domain Registration', 
+        price: 60.00, 
+        description: 'Register a new domain name' 
+      },
+      'hosting': { 
+        name: 'Premium Hosting (1 Year)', 
+        price: 60.00, 
+        description: 'High performance web hosting with unlimited bandwidth' 
+      },
+      'bundle': { 
+        name: 'Hosting + Domain Bundle', 
+        price: 99.00, 
+        description: 'Domain registration with premium hosting package' 
+      }
     };
     
     const selectedProduct = products[type as keyof typeof products];

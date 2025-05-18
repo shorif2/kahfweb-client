@@ -5,28 +5,31 @@ import { useNavigate } from 'react-router-dom';
 
 const serviceCards = [
   {
-    title: "Domain Registration",
-    description: "Register your business domain name with our premium domain service. Includes free DNS management.",
-    price: "$14.99",
+    title: "Domain",
+    description: "Register and manage your domain names with our premium domain services.",
+    price: "$60",
     period: "/year",
-    features: ["Free DNS Management", "Domain Forwarding", "Email Forwarding", "Domain Lock"],
-    type: "domain"
+    features: ["Domain Registration", "Domain Transfer", "Domain Protection"],
+    type: "domain",
+    popular: false
   },
   {
-    title: "Premium Hosting",
-    description: "High-performance business hosting with 99.9% uptime guarantee. Includes SSL certificate & daily backups.",
-    price: "$89.99",
+    title: "Bundle Package",
+    description: "Get everything you need with our complete hosting and domain bundle.",
+    price: "$99",
     period: "/year",
-    features: ["Unlimited Storage", "Unlimited Bandwidth", "Free SSL Certificate", "Free Daily Backups"],
-    type: "hosting"
+    features: ["Domain Registration/Transfer", "USA Premium Hosting", "Domain & Hosting Protection"],
+    type: "bundle",
+    popular: true
   },
   {
-    title: "Domain + Hosting Bundle",
-    description: "Get everything you need to establish your online presence with our complete hosting bundle.",
-    price: "$99.99",
+    title: "Hosting",
+    description: "High-performance business hosting with 99.9% uptime guarantee.",
+    price: "$60",
     period: "/year",
-    features: ["Domain Registration", "Premium Hosting", "Free SSL Certificate", "24/7 Support"],
-    type: "bundle"
+    features: ["Premium Hosting", "USA Premium Hosting", "Hosting Protection"],
+    type: "hosting",
+    popular: false
   }
 ];
 
@@ -37,17 +40,17 @@ const ServiceCards = () => {
     const products = {
       'domain': { 
         name: 'Domain Registration', 
-        price: 14.99, 
+        price: 60.00, 
         description: 'Register your business domain name with our premium domain service' 
       },
       'hosting': { 
         name: 'Premium Hosting (1 Year)', 
-        price: 89.99, 
+        price: 60.00, 
         description: 'High performance web hosting with unlimited bandwidth' 
       },
       'bundle': { 
         name: 'Hosting + Domain Bundle', 
-        price: 99.99, 
+        price: 99.00, 
         description: 'Domain registration with premium hosting package' 
       }
     };
@@ -68,13 +71,21 @@ const ServiceCards = () => {
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {serviceCards.map((card, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-100 flex flex-col">
+            <div key={index} className={`bg-white rounded-lg shadow-lg overflow-hidden border border-gray-100 flex flex-col relative ${card.popular ? 'border-kahf-blue' : ''}`}>
+              {card.popular && (
+                <div className="absolute top-0 right-0 bg-kahf-blue text-white px-4 py-1 text-sm font-medium">
+                  Popular
+                </div>
+              )}
               <div className="p-6 flex-grow">
                 <h3 className="text-xl font-semibold mb-2">{card.title}</h3>
                 <p className="text-gray-600 mb-4 text-sm">{card.description}</p>
                 <div className="mb-4">
                   <span className="text-3xl font-bold text-kahf-blue">{card.price}</span>
                   <span className="text-gray-600">{card.period}</span>
+                </div>
+                <div className="mb-6">
+                  <p className="text-sm text-gray-500 mb-2">Starting From</p>
                 </div>
                 <ul className="mb-6 space-y-2">
                   {card.features.map((feature, i) => (

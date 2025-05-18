@@ -38,7 +38,7 @@ const CheckoutPage = () => {
   // Get product from location state or use default
   const selectedProduct: ProductType = location.state?.selectedProduct || {
     name: "Premium Hosting (1 Year)",
-    price: 89.99,
+    price: 60.00,
     description: "High performance web hosting with unlimited bandwidth",
     image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1"
   };
@@ -83,7 +83,7 @@ const CheckoutPage = () => {
       return;
     }
 
-    if ((selectedProduct.name.includes('Domain') || selectedProduct.name.includes('Bundle')) && !domainName.trim()) {
+    if (!domainName.trim()) {
       toast.error('Please enter a domain name');
       return;
     }
@@ -184,20 +184,22 @@ const CheckoutPage = () => {
                   />
                 </div>
 
-                {/* Domain Name field - shown for domain or bundle purchases */}
-                {(selectedProduct.name.includes('Domain') || selectedProduct.name.includes('Bundle')) && (
-                  <div className="space-y-2">
-                    <Label htmlFor="domainName">Domain Name</Label>
-                    <Input
-                      id="domainName"
-                      value={domainName}
-                      onChange={(e) => setDomainName(e.target.value)}
-                      placeholder="example.com"
-                      required
-                    />
-                    <p className="text-xs text-gray-500">Enter the domain name you wish to register</p>
-                  </div>
-                )}
+                {/* Domain Name field - required for all purchases */}
+                <div className="space-y-2">
+                  <Label htmlFor="domainName">Domain Name</Label>
+                  <Input
+                    id="domainName"
+                    value={domainName}
+                    onChange={(e) => setDomainName(e.target.value)}
+                    placeholder="example.com"
+                    required
+                  />
+                  <p className="text-xs text-gray-500">
+                    {selectedProduct.name.includes('Domain') || selectedProduct.name.includes('Bundle') 
+                      ? 'Enter the domain name you wish to register' 
+                      : 'Enter the domain name to assign to your hosting'}
+                  </p>
+                </div>
               </div>
             </form>
           </div>
@@ -376,7 +378,7 @@ const CheckoutPage = () => {
               <Button 
                 onClick={handleSubmit}
                 className="w-full"
-                disabled={isSubmitting || !agreedToTerms || !selectedPayment || !transactionId || ((selectedProduct.name.includes('Domain') || selectedProduct.name.includes('Bundle')) && !domainName.trim())}
+                disabled={isSubmitting || !agreedToTerms || !selectedPayment || !transactionId || !domainName.trim()}
               >
                 {isSubmitting ? 'Processing...' : 'Complete Order'}
               </Button>

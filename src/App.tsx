@@ -9,7 +9,7 @@ import MainLayout from "./layouts/MainLayout";
 
 // Pages
 import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/LoginPage";
+import GetStartedPage from "./pages/GetStartedPage";
 import UserDashboardPage from "./pages/UserDashboardPage";
 import UserControlPanel from "./pages/UserControlPanel";
 import UserProfilePage from "./pages/UserProfilePage";
@@ -41,7 +41,7 @@ const App = () => (
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
+              <Route path="/get-started" element={<GetStartedPage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/refund" element={<RefundPage />} />
