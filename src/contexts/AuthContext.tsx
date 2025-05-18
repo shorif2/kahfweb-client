@@ -1,108 +1,94 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
 
-// Define the User type
-export type User = {
+import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+
+// Define user types
+export type UserRole = 'user' | 'admin';
+
+export interface User {
   id: string;
-  fullName: string;
   email: string;
-  // Add other user properties as needed
-};
+  fullName: string;
+  role: UserRole;
+}
 
-// Define the AuthContext type
-type AuthContextType = {
+interface AuthContextType {
+  user: User | null;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  signup: (fullName: string, email: string, password: string) => Promise<void>;
-};
+}
 
-// This is a mock implementation of AuthContext for demonstration purposes
-export const AuthContext = createContext<AuthContextType>({
-  isAuthenticated: false,
-  isAdmin: false,
-  user: null,
-  login: () => Promise.resolve(),
-  logout: () => {},
-  signup: () => Promise.resolve(),
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
-    localStorage.getItem('isAuthenticated') === 'true'
-  );
-  const [isAdmin, setIsAdmin] = useState<boolean>(
-    localStorage.getItem('isAdmin') === 'true'
-  );
-  const [user, setUser] = useState<User | null>(
-    JSON.parse(localStorage.getItem('user') || 'null')
-  );
+interface AuthProviderProps {
+  children: ReactNode;
+}
 
-  const login = async (email: string, password: string) => {
-    // Mock login implementation
-    // In a real application, you would make an API call to authenticate the user
-    const mockUser = {
-      id: '123',
-      fullName: 'John Doe',
-      email: email,
-    };
+const DUMMY_USERS: User[] = [
+  {
+    id: '1',
+    email: 'user@example.com',
+    fullName: 'John Doe',
+    role: 'user'
+  },
+  {
+    id: '2', 
+    email: 'admin@example.com',
+    fullName: 'Admin User',
+    role: 'admin'
+  }
+];
 
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('isAdmin', email === 'admin@example.com' ? 'true' : 'false');
-    localStorage.setItem('user', JSON.stringify(mockUser));
+export const AuthProvider = ({ children }: AuthProviderProps) => {
+  const [user, setUser] = useState<User | null>(null);
 
-    setIsAuthenticated(true);
-    setIsAdmin(email === 'admin@example.com');
-    setUser(mockUser);
-  };
+  useEffect(() => {
+    // Check if user is stored in localStorage
+    const storedUser = localStorage.getItem('kahfweb_user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
-  const signup = async (fullName: string, email: string, password: string) => {
-    // Mock signup implementation
-    // In a real application, you would make an API call to create a new user
-    const mockUser = {
-      id: '456',
-      fullName: fullName,
-      email: email,
-    };
-
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('isAdmin', 'false');
-    localStorage.setItem('user', JSON.stringify(mockUser));
-
-    setIsAuthenticated(true);
-    setIsAdmin(false);
-    setUser(mockUser);
+  const login = async (email: string, password: string): Promise<boolean> => {
+    // For now, using dummy authentication
+    const foundUser = DUMMY_USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
+    
+    if (foundUser) {
+      setUser(foundUser);
+      localStorage.setItem('kahfweb_user', JSON.stringify(foundUser));
+      return true;
+    }
+    
+    return false;
   };
 
   const logout = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('isAdmin');
-    localStorage.removeItem('user');
-    setIsAuthenticated(false);
-    setIsAdmin(false);
     setUser(null);
-    // Note: We'll handle redirection in the component
+    localStorage.removeItem('kahfweb_user');
   };
 
-  useEffect(() => {
-    // You can add any initialization logic here
-  }, []);
-
-  const value: AuthContextType = {
-    isAuthenticated,
-    isAdmin,
-    user,
-    login,
-    logout,
-    signup,
-  };
+  const isAuthenticated = !!user;
+  const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      logout, 
+      isAuthenticated,
+      isAdmin
+    }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
