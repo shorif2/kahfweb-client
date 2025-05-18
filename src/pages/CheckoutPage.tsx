@@ -1,6 +1,6 @@
 
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,13 +11,22 @@ import { Metadata } from '@/components/Metadata';
 import { useAuth } from '@/contexts/AuthContext';
 import { Copy } from 'lucide-react';
 
+interface ProductType {
+  name: string;
+  price: number;
+  description: string;
+  image?: string;
+}
+
 const CheckoutPage = () => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const [transactionId, setTransactionId] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [domainName, setDomainName] = useState('');
   const [formData, setFormData] = useState({
     fullName: user?.fullName || '',
     email: user?.email || '',
@@ -26,8 +35,8 @@ const CheckoutPage = () => {
     address: ''
   });
 
-  // Hardcoded product for demo
-  const selectedProduct = {
+  // Get product from location state or use default
+  const selectedProduct: ProductType = location.state?.selectedProduct || {
     name: "Premium Hosting (1 Year)",
     price: 89.99,
     description: "High performance web hosting with unlimited bandwidth",
@@ -71,6 +80,11 @@ const CheckoutPage = () => {
     
     if (!agreedToTerms) {
       toast.error('Please agree to the terms and conditions');
+      return;
+    }
+
+    if ((selectedProduct.name.includes('Domain') || selectedProduct.name.includes('Bundle')) && !domainName.trim()) {
+      toast.error('Please enter a domain name');
       return;
     }
     
@@ -169,6 +183,21 @@ const CheckoutPage = () => {
                     rows={3}
                   />
                 </div>
+
+                {/* Domain Name field - shown for domain or bundle purchases */}
+                {(selectedProduct.name.includes('Domain') || selectedProduct.name.includes('Bundle')) && (
+                  <div className="space-y-2">
+                    <Label htmlFor="domainName">Domain Name</Label>
+                    <Input
+                      id="domainName"
+                      value={domainName}
+                      onChange={(e) => setDomainName(e.target.value)}
+                      placeholder="example.com"
+                      required
+                    />
+                    <p className="text-xs text-gray-500">Enter the domain name you wish to register</p>
+                  </div>
+                )}
               </div>
             </form>
           </div>
@@ -347,7 +376,7 @@ const CheckoutPage = () => {
               <Button 
                 onClick={handleSubmit}
                 className="w-full"
-                disabled={isSubmitting || !agreedToTerms || !selectedPayment || !transactionId}
+                disabled={isSubmitting || !agreedToTerms || !selectedPayment || !transactionId || ((selectedProduct.name.includes('Domain') || selectedProduct.name.includes('Bundle')) && !domainName.trim())}
               >
                 {isSubmitting ? 'Processing...' : 'Complete Order'}
               </Button>

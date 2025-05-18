@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 const SignupForm = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreeToTerms, setAgreeToTerms] = useState(false);
@@ -41,10 +42,7 @@ const SignupForm = () => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Create Your KahfWeb Account</CardTitle>
-      </CardHeader>
+    <>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -66,6 +64,17 @@ const SignupForm = () => {
               placeholder="yourname@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phoneNumber">Phone Number</Label>
+            <Input
+              id="phoneNumber"
+              type="tel"
+              placeholder="+880 1XX XXX XXXX"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
               required
             />
           </div>
@@ -118,15 +127,7 @@ const SignupForm = () => {
           </Button>
         </form>
       </CardContent>
-      <CardFooter>
-        <p className="text-center text-sm text-gray-600 w-full">
-          Already have an account?{' '}
-          <a href="/login" className="text-kahf-blue font-medium hover:underline">
-            Login
-          </a>
-        </p>
-      </CardFooter>
-    </Card>
+    </>
   );
 };
 

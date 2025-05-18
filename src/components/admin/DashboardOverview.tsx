@@ -52,7 +52,7 @@ const statCards = [
     action: {
       text: 'View All',
       icon: null,
-      type: 'view'
+      type: 'view-expiring'
     }
   },
 ];
@@ -90,6 +90,50 @@ const recentActivity = [
     date: '2023-05-01',
     status: 'Active',
   },
+];
+
+// Mock data for expiring items
+const expiringItems = [
+  {
+    id: 1,
+    client: 'Stark Industries',
+    email: 'tony@stark.com',
+    phone: '+1 234 567 890',
+    service: 'Domain: starkindustries.com',
+    expireDate: '2023-06-10',
+  },
+  {
+    id: 2,
+    client: 'Wayne Enterprises',
+    email: 'bruce@wayne.com',
+    phone: '+1 987 654 321',
+    service: 'Hosting: Premium Plan',
+    expireDate: '2023-06-12',
+  },
+  {
+    id: 3,
+    client: 'Oscorp Industries',
+    email: 'norman@oscorp.com',
+    phone: '+1 555 123 4567',
+    service: 'Domain: oscorp.com',
+    expireDate: '2023-06-15',
+  },
+  {
+    id: 4,
+    client: 'LexCorp',
+    email: 'lex@lexcorp.com',
+    phone: '+1 555 987 6543',
+    service: 'Bundle: lexcorp.com',
+    expireDate: '2023-06-20',
+  },
+  {
+    id: 5,
+    client: 'Daily Planet',
+    email: 'clark@dailyplanet.com',
+    phone: '+1 555 111 2222',
+    service: 'Hosting: Basic Plan',
+    expireDate: '2023-06-25',
+  }
 ];
 
 const DashboardOverview = () => {
@@ -390,6 +434,48 @@ const DashboardOverview = () => {
                 </div>
               </>
             )}
+          </div>
+          <DialogFooter>
+            <Button onClick={handleCloseDialog}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Expiring Services Dialog */}
+      <Dialog open={dialogType === 'view-expiring'} onOpenChange={() => handleCloseDialog()}>
+        <DialogContent className="sm:max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Services Expiring Soon</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-y border-gray-200">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client Name</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone Number</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expiry Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {expiringItems.map((item) => (
+                    <tr key={item.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{item.client}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{item.email}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{item.phone}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{item.service}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          {item.expireDate}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
           <DialogFooter>
             <Button onClick={handleCloseDialog}>Close</Button>
