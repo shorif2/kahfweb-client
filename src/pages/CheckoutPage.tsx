@@ -18,6 +18,16 @@ interface ProductType {
   image?: string;
 }
 
+interface PaymentMethod {
+  id: string;
+  name: string;
+  accountNumber: string;
+  instructions: string;
+  payAmount: string;
+  currency: string;
+  isActive: boolean;
+}
+
 const CheckoutPage = () => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -27,6 +37,7 @@ const CheckoutPage = () => {
   const [transactionId, setTransactionId] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [domainName, setDomainName] = useState('');
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [formData, setFormData] = useState({
     fullName: user?.fullName || '',
     email: user?.email || '',
@@ -34,6 +45,9 @@ const CheckoutPage = () => {
     phone: '',
     address: ''
   });
+
+  // Refs for account number elements
+  const accountNumberRefs = useRef<{[key: string]: HTMLInputElement | null}>({});
 
   // Get product from location state or use default
   const selectedProduct: ProductType = location.state?.selectedProduct || {
@@ -43,10 +57,13 @@ const CheckoutPage = () => {
     image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1"
   };
 
-  const bKashNumber = "0123456789";
-  const nagadNumber = "0123456789";
-  const bKashRef = useRef<HTMLInputElement>(null);
-  const nagadRef = useRef<HTMLInputElement>(null);
+  // Load payment methods from localStorage on component mount
+  useEffect(() => {
+    const storedMethods = localStorage.getItem('kahfweb_payment_methods');
+    if (storedMethods) {
+      setPaymentMethods(JSON.parse(storedMethods));
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -55,14 +72,9 @@ const CheckoutPage = () => {
     });
   };
 
-  const handleCopyNumber = (type: string) => {
-    if (type === 'bKash') {
-      navigator.clipboard.writeText(bKashNumber);
-      toast.success('bKash number copied to clipboard');
-    } else {
-      navigator.clipboard.writeText(nagadNumber);
-      toast.success('Nagad number copied to clipboard');
-    }
+  const handleCopyNumber = (accountNumber: string, methodName: string) => {
+    navigator.clipboard.writeText(accountNumber);
+    toast.success(`${methodName} number copied to clipboard`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -245,105 +257,70 @@ const CheckoutPage = () => {
               <h2 className="text-xl font-semibold mb-6">Payment Method</h2>
               
               <div className="space-y-6">
-                {/* bKash Payment */}
-                <div 
-                  className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedPayment === 'bKash' ? 'border-kahf-blue bg-blue-50' : 'hover:border-gray-400'}`}
-                  onClick={() => setSelectedPayment('bKash')}
-                >
-                  <div className="flex items-center mb-4">
-                    <div className="h-5 w-5 rounded-full border-2 border-gray-300 flex items-center justify-center mr-3">
-                      {selectedPayment === 'bKash' && <div className="h-3 w-3 rounded-full bg-kahf-blue" />}
-                    </div>
-                    <span className="font-medium">Pay with bKash</span>
-                  </div>
-                  
-                  {selectedPayment === 'bKash' && (
-                    <div className="pl-8 space-y-4">
-                      <div className="flex items-center space-x-2">
-                        <Input 
-                          value={bKashNumber}
-                          readOnly
-                          className="bg-gray-50"
-                          ref={bKashRef}
-                        />
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          size="icon"
-                          onClick={() => handleCopyNumber('bKash')}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      
-                      <div className="flex items-center justify-center">
-                        <div className="bg-white p-2 rounded shadow w-32 h-32 flex items-center justify-center">
-                          <div className="text-center text-gray-500 text-sm">QR Code Placeholder</div>
+                {paymentMethods.length > 0 ? (
+                  paymentMethods.map(method => (
+                    <div 
+                      key={method.id}
+                      className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedPayment === method.id ? 'border-kahf-blue bg-blue-50' : 'hover:border-gray-400'}`}
+                      onClick={() => setSelectedPayment(method.id)}
+                    >
+                      <div className="flex items-center mb-4">
+                        <div className="h-5 w-5 rounded-full border-2 border-gray-300 flex items-center justify-center mr-3">
+                          {selectedPayment === method.id && <div className="h-3 w-3 rounded-full bg-kahf-blue" />}
                         </div>
+                        <span className="font-medium">Pay with {method.name}</span>
                       </div>
                       
-                      <div>
-                        <Label htmlFor="bKashTxn">Transaction ID</Label>
-                        <Input 
-                          id="bKashTxn" 
-                          value={transactionId}
-                          onChange={(e) => setTransactionId(e.target.value)}
-                          placeholder="Enter bKash transaction ID" 
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Nagad Payment */}
-                <div 
-                  className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedPayment === 'Nagad' ? 'border-kahf-blue bg-blue-50' : 'hover:border-gray-400'}`}
-                  onClick={() => setSelectedPayment('Nagad')}
-                >
-                  <div className="flex items-center mb-4">
-                    <div className="h-5 w-5 rounded-full border-2 border-gray-300 flex items-center justify-center mr-3">
-                      {selectedPayment === 'Nagad' && <div className="h-3 w-3 rounded-full bg-kahf-blue" />}
-                    </div>
-                    <span className="font-medium">Pay with Nagad</span>
-                  </div>
-                  
-                  {selectedPayment === 'Nagad' && (
-                    <div className="pl-8 space-y-4">
-                      <div className="flex items-center space-x-2">
-                        <Input 
-                          value={nagadNumber}
-                          readOnly
-                          className="bg-gray-50"
-                          ref={nagadRef}
-                        />
-                        <Button 
-                          type="button" 
-                          variant="outline" 
-                          size="icon"
-                          onClick={() => handleCopyNumber('Nagad')}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      
-                      <div className="flex items-center justify-center">
-                        <div className="bg-white p-2 rounded shadow w-32 h-32 flex items-center justify-center">
-                          <div className="text-center text-gray-500 text-sm">QR Code Placeholder</div>
+                      {selectedPayment === method.id && (
+                        <div className="pl-8 space-y-4">
+                          <div className="flex items-center space-x-2">
+                            <Input 
+                              value={method.accountNumber}
+                              readOnly
+                              className="bg-gray-50"
+                              ref={el => accountNumberRefs.current[method.id] = el}
+                            />
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              size="icon"
+                              onClick={() => handleCopyNumber(method.accountNumber, method.name)}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          
+                          {method.payAmount && (
+                            <div className="text-sm bg-blue-50 p-3 rounded-md border border-blue-100">
+                              <span className="font-medium">Pay amount:</span> {method.payAmount} {method.currency}
+                            </div>
+                          )}
+                          
+                          {method.instructions && (
+                            <div className="text-sm text-gray-600">
+                              <p className="font-medium mb-1">Instructions:</p>
+                              <p>{method.instructions}</p>
+                            </div>
+                          )}
+                          
+                          <div>
+                            <Label htmlFor={`txn-${method.id}`}>Transaction ID</Label>
+                            <Input 
+                              id={`txn-${method.id}`}
+                              value={transactionId}
+                              onChange={(e) => setTransactionId(e.target.value)}
+                              placeholder={`Enter ${method.name} transaction ID`} 
+                            />
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="nagadTxn">Transaction ID</Label>
-                        <Input 
-                          id="nagadTxn" 
-                          value={transactionId}
-                          onChange={(e) => setTransactionId(e.target.value)}
-                          placeholder="Enter Nagad transaction ID" 
-                        />
-                      </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                  ))
+                ) : (
+                  <div className="text-center p-6 text-gray-500">
+                    <p>No payment methods available. Please contact support.</p>
+                  </div>
+                )}
               </div>
             </div>
             
