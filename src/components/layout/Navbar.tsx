@@ -28,7 +28,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img 
-              src="https://iili.io/3PxeQTl.png" 
+              src="https://iili.io/3P4zDwG.png" 
               alt="KahfWeb Logo" 
               style={{height: '50px', maxWidth: '100%'}}
             />
