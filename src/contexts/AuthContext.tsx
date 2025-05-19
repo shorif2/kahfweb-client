@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setUser(null);
     localStorage.removeItem('kahfweb_user');
     
-    // Redirect to /get-started instead of /login
+    // Directly navigate to /get-started without intermediate redirects
     window.location.href = '/get-started';
   };
 

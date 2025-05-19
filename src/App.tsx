@@ -19,6 +19,7 @@ import AdminOrdersPage from "./pages/AdminOrdersPage";
 import AdminControlPanel from "./pages/AdminControlPanel";
 import AdminProfilePage from "./pages/AdminProfilePage";
 import AdminBlogPage from "./pages/AdminBlogPage";
+import AdminSettingsPage from "./pages/AdminSettingsPage";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import RefundPage from "./pages/RefundPage";
@@ -62,6 +63,7 @@ const App = () => (
               <Route path="/admin/blog" element={<AdminBlogPage />} />
               <Route path="/admin/control-panel" element={<AdminControlPanel />} />
               <Route path="/admin/profile" element={<AdminProfilePage />} />
+              <Route path="/admin/settings" element={<AdminSettingsPage />} />
               
               {/* 404 page */}
               <Route path="*" element={<NotFound />} />
