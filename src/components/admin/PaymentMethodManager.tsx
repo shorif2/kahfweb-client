@@ -20,7 +20,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Upload } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface PaymentMethod {
   id: string;
@@ -30,6 +31,8 @@ interface PaymentMethod {
   payAmount: string;
   currency: string;
   isActive: boolean;
+  logo?: string; // Optional logo URL
+  qrCode?: string; // Optional QR code URL
 }
 
 const PaymentMethodManager = () => {
@@ -45,6 +48,10 @@ const PaymentMethodManager = () => {
     currency: 'BDT',
     isActive: true
   });
+  
+  // File input references
+  const logoInputRef = React.useRef<HTMLInputElement>(null);
+  const qrCodeInputRef = React.useRef<HTMLInputElement>(null);
 
   // Load payment methods from localStorage on component mount
   useEffect(() => {
@@ -67,6 +74,20 @@ const PaymentMethodManager = () => {
     });
   };
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, fieldName: 'logo' | 'qrCode') => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      setCurrentMethod(prev => ({
+        ...prev,
+        [fieldName]: reader.result as string
+      }));
+    };
+  };
+
   const resetForm = () => {
     setCurrentMethod({
       id: '',
@@ -75,9 +96,15 @@ const PaymentMethodManager = () => {
       instructions: '',
       payAmount: '',
       currency: 'BDT',
-      isActive: true
+      isActive: true,
+      logo: undefined,
+      qrCode: undefined
     });
     setIsEditing(false);
+    
+    // Reset file inputs
+    if (logoInputRef.current) logoInputRef.current.value = '';
+    if (qrCodeInputRef.current) qrCodeInputRef.current.value = '';
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -144,6 +171,68 @@ const PaymentMethodManager = () => {
         <form onSubmit={handleSubmit}>
           <CardContent>
             <div className="grid gap-4">
+              {/* Logo upload section */}
+              <div className="grid gap-2">
+                <Label>Logo</Label>
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16">
+                    {currentMethod.logo ? (
+                      <AvatarImage src={currentMethod.logo} alt={currentMethod.name} />
+                    ) : (
+                      <AvatarFallback className="text-xs">Logo</AvatarFallback>
+                    )}
+                  </Avatar>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => logoInputRef.current?.click()}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Logo
+                  </Button>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    ref={logoInputRef}
+                    onChange={(e) => handleFileUpload(e, 'logo')}
+                  />
+                </div>
+              </div>
+              
+              {/* QR Code upload section */}
+              <div className="grid gap-2">
+                <Label>QR Code</Label>
+                <div className="flex items-center gap-4">
+                  <div className="border border-gray-200 rounded-md h-24 w-24 flex items-center justify-center overflow-hidden">
+                    {currentMethod.qrCode ? (
+                      <img 
+                        src={currentMethod.qrCode} 
+                        alt="QR Code" 
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    ) : (
+                      <span className="text-xs text-gray-400">No QR Code</span>
+                    )}
+                  </div>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => qrCodeInputRef.current?.click()}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload QR Code
+                  </Button>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    ref={qrCodeInputRef}
+                    onChange={(e) => handleFileUpload(e, 'qrCode')}
+                  />
+                </div>
+              </div>
+
               <div className="grid gap-2">
                 <Label htmlFor="name">Method Name</Label>
                 <Input
@@ -228,20 +317,42 @@ const PaymentMethodManager = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Logo</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Account Number</TableHead>
                   <TableHead>Currency</TableHead>
                   <TableHead>Pay Amount</TableHead>
+                  <TableHead>QR Code</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paymentMethods.map((method) => (
                   <TableRow key={method.id}>
+                    <TableCell>
+                      <Avatar className="h-8 w-8">
+                        {method.logo ? (
+                          <AvatarImage src={method.logo} alt={method.name} />
+                        ) : (
+                          <AvatarFallback className="text-xs">{method.name.charAt(0)}</AvatarFallback>
+                        )}
+                      </Avatar>
+                    </TableCell>
                     <TableCell className="font-medium">{method.name}</TableCell>
                     <TableCell>{method.accountNumber}</TableCell>
                     <TableCell>{method.currency}</TableCell>
                     <TableCell>{method.payAmount}</TableCell>
+                    <TableCell>
+                      {method.qrCode && (
+                        <div className="h-8 w-8 relative">
+                          <img 
+                            src={method.qrCode} 
+                            alt="QR" 
+                            className="h-full w-full object-cover rounded-sm"
+                          />
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
                         <Button 

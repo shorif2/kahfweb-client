@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { Metadata } from '@/components/Metadata';
 import { useAuth } from '@/contexts/AuthContext';
 import { Copy } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface ProductType {
   name: string;
@@ -26,6 +27,8 @@ interface PaymentMethod {
   payAmount: string;
   currency: string;
   isActive: boolean;
+  logo?: string;
+  qrCode?: string;
 }
 
 const CheckoutPage = () => {
@@ -109,6 +112,9 @@ const CheckoutPage = () => {
       navigate('/dashboard');
     }, 1500);
   };
+
+  // Get the selected payment method details
+  const selectedPaymentMethod = paymentMethods.find(method => method.id === selectedPayment);
 
   return (
     <>
@@ -268,49 +274,75 @@ const CheckoutPage = () => {
                         <div className="h-5 w-5 rounded-full border-2 border-gray-300 flex items-center justify-center mr-3">
                           {selectedPayment === method.id && <div className="h-3 w-3 rounded-full bg-kahf-blue" />}
                         </div>
-                        <span className="font-medium">Pay with {method.name}</span>
+                        <div className="flex items-center gap-3">
+                          {method.logo ? (
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage src={method.logo} alt={method.name} />
+                              <AvatarFallback>{method.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                          ) : null}
+                          <span className="font-medium">Pay with {method.name}</span>
+                        </div>
                       </div>
                       
                       {selectedPayment === method.id && (
                         <div className="pl-8 space-y-4">
-                          <div className="flex items-center space-x-2">
-                            <Input 
-                              value={method.accountNumber}
-                              readOnly
-                              className="bg-gray-50"
-                              ref={el => accountNumberRefs.current[method.id] = el}
-                            />
-                            <Button 
-                              type="button" 
-                              variant="outline" 
-                              size="icon"
-                              onClick={() => handleCopyNumber(method.accountNumber, method.name)}
-                            >
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          
-                          {method.payAmount && (
-                            <div className="text-sm bg-blue-50 p-3 rounded-md border border-blue-100">
-                              <span className="font-medium">Pay amount:</span> {method.payAmount} {method.currency}
+                          <div className="flex flex-col md:flex-row md:items-center gap-4">
+                            <div className="flex-1 space-y-4">
+                              <div className="flex items-center space-x-2">
+                                <Input 
+                                  value={method.accountNumber}
+                                  readOnly
+                                  className="bg-gray-50"
+                                  ref={el => accountNumberRefs.current[method.id] = el}
+                                />
+                                <Button 
+                                  type="button" 
+                                  variant="outline" 
+                                  size="icon"
+                                  onClick={() => handleCopyNumber(method.accountNumber, method.name)}
+                                >
+                                  <Copy className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              
+                              {method.payAmount && (
+                                <div className="text-sm bg-blue-50 p-3 rounded-md border border-blue-100">
+                                  <span className="font-medium">Pay amount:</span> {method.payAmount} {method.currency}
+                                </div>
+                              )}
+                              
+                              {method.instructions && (
+                                <div className="text-sm text-gray-600">
+                                  <p className="font-medium mb-1">Instructions:</p>
+                                  <p>{method.instructions}</p>
+                                </div>
+                              )}
+                              
+                              <div>
+                                <Label htmlFor={`txn-${method.id}`}>Transaction ID</Label>
+                                <Input 
+                                  id={`txn-${method.id}`}
+                                  value={transactionId}
+                                  onChange={(e) => setTransactionId(e.target.value)}
+                                  placeholder={`Enter ${method.name} transaction ID`} 
+                                />
+                              </div>
                             </div>
-                          )}
-                          
-                          {method.instructions && (
-                            <div className="text-sm text-gray-600">
-                              <p className="font-medium mb-1">Instructions:</p>
-                              <p>{method.instructions}</p>
-                            </div>
-                          )}
-                          
-                          <div>
-                            <Label htmlFor={`txn-${method.id}`}>Transaction ID</Label>
-                            <Input 
-                              id={`txn-${method.id}`}
-                              value={transactionId}
-                              onChange={(e) => setTransactionId(e.target.value)}
-                              placeholder={`Enter ${method.name} transaction ID`} 
-                            />
+                            
+                            {/* QR Code display */}
+                            {method.qrCode && (
+                              <div className="flex flex-col items-center justify-center">
+                                <div className="bg-white p-2 border rounded-lg shadow-sm">
+                                  <img 
+                                    src={method.qrCode} 
+                                    alt={`${method.name} QR Code`} 
+                                    className="w-32 h-32 object-contain"
+                                  />
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">Scan QR Code to pay</p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
