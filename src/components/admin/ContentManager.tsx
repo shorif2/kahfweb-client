@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   Card, 
@@ -11,17 +11,10 @@ import {
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import dynamic from 'next/dynamic';
-
-// Import React Quill with dynamic import to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 import 'react-quill/dist/quill.snow.css';
 
-// Initial content from existing pages
-import AboutContent from '@/components/legal/TermsContent';
-import PrivacyContent from '@/components/legal/PrivacyContent';
-import RefundContent from '@/components/legal/RefundContent';
-import TermsContent from '@/components/legal/TermsContent';
+// Use React's lazy loading instead of Next.js dynamic import
+const ReactQuill = lazy(() => import('react-quill'));
 
 type ContentPage = 'about' | 'contact' | 'terms' | 'privacy' | 'refund';
 
@@ -82,12 +75,14 @@ const ContentManager = () => {
               <TabsTrigger value="refund">Refund</TabsTrigger>
             </TabsList>
             
-            <ReactQuill 
-              theme="snow"
-              value={content[activeTab]}
-              onChange={handleContentChange}
-              className="h-80 mb-12"
-            />
+            <Suspense fallback={<div className="h-80 flex items-center justify-center">Loading editor...</div>}>
+              <ReactQuill 
+                theme="snow"
+                value={content[activeTab]}
+                onChange={handleContentChange}
+                className="h-80 mb-12"
+              />
+            </Suspense>
           </Tabs>
         </CardContent>
         <CardFooter>
