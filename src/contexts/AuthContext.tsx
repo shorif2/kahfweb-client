@@ -67,6 +67,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('kahfweb_user');
+    
+    // Redirect to /get-started instead of /login
+    window.location.href = '/get-started';
   };
 
   const isAuthenticated = !!user;

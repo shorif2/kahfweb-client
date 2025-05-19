@@ -42,6 +42,9 @@ const ProfileSettings = () => {
     }, 1000);
   };
 
+  // Safe access to user.role with type checking
+  const userRole = user && 'role' in user ? user.role : 'customer';
+
   return (
     <div className="max-w-2xl mx-auto">
       <Card>
@@ -70,7 +73,7 @@ const ProfileSettings = () => {
               <Label htmlFor="role">Account Type</Label>
               <Input 
                 id="role" 
-                value={user?.role === 'admin' ? 'Administrator' : 'Customer'} 
+                value={userRole === 'admin' ? 'Administrator' : 'Customer'} 
                 disabled 
               />
             </div>

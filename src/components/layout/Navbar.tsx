@@ -14,9 +14,15 @@ import { User, LogOut, Settings, Home } from 'lucide-react';
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isAuthenticated, user, logout, isAdmin } = useAuth();
+  
+  // Determine if we're in admin or user dashboard
+  const isDashboard = window.location.pathname.includes('/admin') || 
+                     window.location.pathname === '/dashboard' ||
+                     window.location.pathname === '/control-panel' ||
+                     window.location.pathname === '/profile';
 
   return (
-    <nav className="bg-white shadow-sm py-4 fixed top-0 left-0 right-0 z-50">
+    <nav className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50" style={{paddingTop: '7px', paddingBottom: '7px'}}>
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex justify-between items-center">
           {/* Logo */}
@@ -24,33 +30,39 @@ const Navbar = () => {
             <img 
               src="https://iili.io/3PxeQTl.png" 
               alt="KahfWeb Logo" 
-              className="h-8 w-auto"
+              style={{height: '50px', maxWidth: '100%'}}
             />
           </Link>
 
-          {/* Desktop Menu */}
+          {/* Desktop Menu - Different for dashboard and public pages */}
           <div className="hidden md:flex space-x-8">
-            <Link to="/" className="text-gray-700 hover:text-kahf-blue font-medium">
-              Home
-            </Link>
-            <Link to="/domains" className="text-gray-700 hover:text-kahf-blue font-medium">
-              Domains
-            </Link>
-            <Link to="/hosting" className="text-gray-700 hover:text-kahf-blue font-medium">
-              Hosting
-            </Link>
-            <Link to="/bundle" className="text-gray-700 hover:text-kahf-blue font-medium">
-              Bundle
-            </Link>
-            <Link to="/about" className="text-gray-700 hover:text-kahf-blue font-medium">
-              About
-            </Link>
-            <Link to="/contact" className="text-gray-700 hover:text-kahf-blue font-medium">
-              Contact
-            </Link>
-            <Link to="/blog" className="text-gray-700 hover:text-kahf-blue font-medium">
-              Blog
-            </Link>
+            {isDashboard ? (
+              // Dashboard menu
+              <>
+                <Link to="/" className="text-gray-700 hover:text-kahf-blue font-medium">
+                  Home
+                </Link>
+                <Link to={isAdmin ? "/admin/control-panel" : "/control-panel"} className="text-gray-700 hover:text-kahf-blue font-medium">
+                  Control Panel
+                </Link>
+              </>
+            ) : (
+              // Public pages menu
+              <>
+                <Link to="/" className="text-gray-700 hover:text-kahf-blue font-medium">
+                  Home
+                </Link>
+                <Link to="/about" className="text-gray-700 hover:text-kahf-blue font-medium">
+                  About
+                </Link>
+                <Link to="/contact" className="text-gray-700 hover:text-kahf-blue font-medium">
+                  Contact
+                </Link>
+                <Link to="/blog" className="text-gray-700 hover:text-kahf-blue font-medium">
+                  Blog
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Auth Buttons */}
@@ -129,55 +141,57 @@ const Navbar = () => {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden mt-4 py-2 space-y-2 border-t border-gray-100">
-            <Link
-              to="/"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
-              to="/domains"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Domains
-            </Link>
-            <Link
-              to="/hosting"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Hosting
-            </Link>
-            <Link
-              to="/bundle"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Bundle
-            </Link>
-            <Link
-              to="/about"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              to="/contact"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Contact
-            </Link>
-            <Link
-              to="/blog"
-              className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Blog
-            </Link>
+            {isDashboard ? (
+              // Dashboard mobile menu
+              <>
+                <Link
+                  to="/"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link
+                  to={isAdmin ? "/admin/control-panel" : "/control-panel"}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Control Panel
+                </Link>
+              </>
+            ) : (
+              // Public pages mobile menu
+              <>
+                <Link
+                  to="/"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link
+                  to="/about"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  About
+                </Link>
+                <Link
+                  to="/contact"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Contact
+                </Link>
+                <Link
+                  to="/blog"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Blog
+                </Link>
+              </>
+            )}
             
             {isAuthenticated ? (
               <>
