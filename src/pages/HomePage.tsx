@@ -20,8 +20,8 @@ const HomePage = () => {
         <FeatureCards />
         <ServiceCards />
         <WhyChooseUs />
-        <SEOSection />
         <Testimonials />
+        <SEOSection />
       </main>
     </>
   );
