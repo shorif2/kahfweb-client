@@ -43,7 +43,7 @@ import { useGetUserQuery } from "./redux/features/auth/authApi";
 import { setUser } from "./redux/features/auth/authSlice";
 import PrivateRoute from "./protectedRoute/Privateroute";
 import Loader from "./components/loader/Loader";
-import CheckDomain from "./pagex/checkDomain";
+import CheckDomain from "./pagex/CheckDomain";
 
 const Apx = () => {
   const { data, isSuccess, isLoading } = useGetUserQuery();

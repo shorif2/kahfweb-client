@@ -13,7 +13,7 @@ const CheckDomain = () => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const checkDomain = async () => {
+  const checkingDomain = async () => {
     setLoading(true);
     if (!domainBase) {
       setResults([{ domain: "", message: "Please enter a domain base." }]);
@@ -75,7 +75,7 @@ const CheckDomain = () => {
   useEffect(() => {
     if (!domainBase) return;
     const timeoutId = setTimeout(() => {
-      checkDomain();
+      checkingDomain();
     }, 600);
     return () => clearTimeout(timeoutId);
   }, [domainBase]);
@@ -110,7 +110,7 @@ const CheckDomain = () => {
             />
             <div className="">
               <button
-                onClick={checkDomain}
+                onClick={checkingDomain}
                 className="w-[40px] h-[40px] inline-flex justify-center items-center gap-x-2 text-sm font-bold rounded border border-transparent hover:bg-red-500 text-white bg-blue-700 "
               >
                 <Search className="h-5 w-5 text-white" />

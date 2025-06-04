@@ -27,7 +27,6 @@ import ContactPage from "./pages/ContactPage";
 import BlogPage from "./pages/BlogPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import NotFound from "./pages/NotFound";
-import CheckDomain from "./pagex/checkDomain";
 
 const queryClient = new QueryClient();
 
