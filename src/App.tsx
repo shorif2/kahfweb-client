@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,6 +27,7 @@ import ContactPage from "./pages/ContactPage";
 import BlogPage from "./pages/BlogPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import NotFound from "./pages/NotFound";
+import CheckDomain from "./pagex/checkDomain";
 
 const queryClient = new QueryClient();
 
@@ -50,21 +50,25 @@ const App = () => (
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
-              
+              <Route path="/checkout" element={<CheckoutPage />} />
+
               {/* User routes */}
               <Route path="/dashboard" element={<UserDashboardPage />} />
               <Route path="/control-panel" element={<UserControlPanel />} />
               <Route path="/profile" element={<UserProfilePage />} />
-              
+
               {/* Admin routes */}
               <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
               <Route path="/admin/clients" element={<AdminClientsPage />} />
               <Route path="/admin/orders" element={<AdminOrdersPage />} />
               <Route path="/admin/blog" element={<AdminBlogPage />} />
-              <Route path="/admin/control-panel" element={<AdminControlPanel />} />
+              <Route
+                path="/admin/control-panel"
+                element={<AdminControlPanel />}
+              />
               <Route path="/admin/profile" element={<AdminProfilePage />} />
               <Route path="/admin/settings" element={<AdminSettingsPage />} />
-              
+
               {/* 404 page */}
               <Route path="*" element={<NotFound />} />
             </Routes>

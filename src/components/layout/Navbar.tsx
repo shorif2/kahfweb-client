@@ -1,73 +1,80 @@
-
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { RootState } from "@/redux/store";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { User, LogOut, Settings, Home } from 'lucide-react';
+} from "@/components/ui/dropdown-menu";
+import { User, LogOut, Settings, Home } from "lucide-react";
+import { useSelector } from "react-redux";
+import { useLogoutMutation } from "@/redux/features/auth/authApi";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isAuthenticated, user, logout, isAdmin } = useAuth();
-  
+  const { isAuthenticated, isAdmin } = useAuth();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const [logout] = useLogoutMutation();
+
   // Determine if we're in admin or user dashboard
-  const isDashboard = window.location.pathname.includes('/admin') || 
-                     window.location.pathname === '/dashboard' ||
-                     window.location.pathname === '/control-panel' ||
-                     window.location.pathname === '/profile';
+  const isDashboard =
+    window.location.pathname.includes("/admin") ||
+    window.location.pathname === "/dashboard" ||
+    window.location.pathname === "/control-panel" ||
+    window.location.pathname === "/profile";
 
   return (
-    <nav className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50" style={{paddingTop: '7px', paddingBottom: '7px'}}>
+    <nav
+      className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50"
+      style={{ paddingTop: "7px", paddingBottom: "7px" }}
+    >
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img 
-              src="https://iili.io/3P4zDwG.png" 
-              alt="KahfWeb Logo" 
-              style={{height: '50px', maxWidth: '100%'}}
+            <img
+              src="https://iili.io/3P4zDwG.png"
+              alt="KahfWeb Logo"
+              style={{ height: "50px", maxWidth: "100%" }}
             />
           </Link>
 
           {/* Desktop Menu - Different for dashboard and public pages */}
           <div className="hidden md:flex space-x-8">
-            {isDashboard ? (
-              // Dashboard menu
-              <>
-                <Link to="/" className="text-gray-700 hover:text-kahf-blue font-medium">
-                  Home
-                </Link>
-                <Link to={isAdmin ? "/admin/control-panel" : "/control-panel"} className="text-gray-700 hover:text-kahf-blue font-medium">
-                  Control Panel
-                </Link>
-              </>
-            ) : (
-              // Public pages menu
-              <>
-                <Link to="/" className="text-gray-700 hover:text-kahf-blue font-medium">
-                  Home
-                </Link>
-                <Link to="/about" className="text-gray-700 hover:text-kahf-blue font-medium">
-                  About
-                </Link>
-                <Link to="/contact" className="text-gray-700 hover:text-kahf-blue font-medium">
-                  Contact
-                </Link>
-                <Link to="/blog" className="text-gray-700 hover:text-kahf-blue font-medium">
-                  Blog
-                </Link>
-              </>
-            )}
+            <>
+              <Link
+                to="/"
+                className="text-gray-700 hover:text-kahf-blue font-medium"
+              >
+                Home
+              </Link>
+              <Link
+                to="/about"
+                className="text-gray-700 hover:text-kahf-blue font-medium"
+              >
+                About
+              </Link>
+              <Link
+                to="/contact"
+                className="text-gray-700 hover:text-kahf-blue font-medium"
+              >
+                Contact
+              </Link>
+              <Link
+                to="/blog"
+                className="text-gray-700 hover:text-kahf-blue font-medium"
+              >
+                Blog
+              </Link>
+            </>
           </div>
 
           {/* Auth Buttons */}
           <div className="hidden md:block">
-            {isAuthenticated ? (
+            {user ? (
               <div className="flex items-center">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -78,17 +85,17 @@ const Navbar = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem>
-                      <Link to={isAdmin ? "/admin/dashboard" : "/dashboard"} className="flex w-full">
+                      <Link to="/dashboard" className="flex w-full">
                         Dashboard
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Link to={isAdmin ? "/admin/profile" : "/profile"} className="flex w-full">
+                      <Link to="/dashboard/profile" className="flex w-full">
                         <Settings className="h-4 w-4 mr-2" />
                         Profile Settings
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={logout}>
+                    <DropdownMenuItem onClick={() => logout()}>
                       <span className="flex items-center w-full">
                         <LogOut className="h-4 w-4 mr-2" />
                         Sign Out
@@ -152,7 +159,7 @@ const Navbar = () => {
                   Home
                 </Link>
                 <Link
-                  to={isAdmin ? "/admin/control-panel" : "/control-panel"}
+                  to="/dashboard/control-panel"
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -192,18 +199,18 @@ const Navbar = () => {
                 </Link>
               </>
             )}
-            
+
             {isAuthenticated ? (
               <>
                 <Link
-                  to={isAdmin ? "/admin/dashboard" : "/dashboard"}
+                  to="/dashboard"
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
                 <Link
-                  to={isAdmin ? "/admin/profile" : "/profile"}
+                  to="/dashboard/profile"
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >

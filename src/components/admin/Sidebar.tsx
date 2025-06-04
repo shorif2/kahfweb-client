@@ -1,67 +1,127 @@
-
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { HomeIcon, Users, ShoppingCart, FileText, Settings } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import {
+  HomeIcon,
+  Users,
+  ShoppingCart,
+  FileText,
+  Settings,
+  MonitorCog,
+  ContactRound,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const AdminSidebar = () => {
+  // const { isAuthenticated, isAdmin } = useAuth();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const isAdmin = user?.role === "admin" ? true : false;
+
   const location = useLocation();
-  
+
   const isActive = (path: string) => {
     return location.pathname === path;
   };
 
   const menuItems = [
     {
-      name: 'Dashboard',
-      href: '/admin/dashboard',
-      icon: <HomeIcon size={18} />,
-    },
-    {
-      name: 'Clients',
-      href: '/admin/clients',
+      name: "Clients",
+      href: "/dashboard/clients",
       icon: <Users size={18} />,
     },
     {
-      name: 'Orders',
-      href: '/admin/orders',
+      name: "Orders",
+      href: "/dashboard/orders",
       icon: <ShoppingCart size={18} />,
     },
     {
-      name: 'Blog',
-      href: '/admin/blog',
+      name: "Blog",
+      href: "/dashboard/blog",
       icon: <FileText size={18} />,
     },
     {
-      name: 'Settings',
-      href: '/admin/settings',
+      name: "Settings",
+      href: "/dashboard/settings",
       icon: <Settings size={18} />,
     },
   ];
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 shadow-sm h-[calc(100vh-64px)] overflow-y-auto">
+    <aside className="w-64 bg-white border-r border-gray-200 shadow-sm h-[calc(100vh)] overflow-y-auto">
       <div className="p-4">
-        <h2 className="text-lg font-semibold text-gray-700">Admin Panel</h2>
+        <Link to="/" className="text-lg font-semibold text-gray-700">
+          {isAdmin ? "Admin Panel" : "User Panel"}
+        </Link>
       </div>
       <nav className="px-2 pt-2 pb-4">
         <ul className="space-y-1">
-          {menuItems.map((item, index) => (
-            <li key={index}>
-              <Link
-                to={item.href}
-                className={cn(
-                  "flex items-center px-4 py-2.5 text-sm font-medium rounded-md",
-                  isActive(item.href)
-                    ? "bg-kahf-blue text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                )}
-              >
-                <span className="mr-3">{item.icon}</span>
-                {item.name}
-              </Link>
-            </li>
-          ))}
+          <li>
+            <Link
+              to="/dashboard"
+              className={cn(
+                "flex items-center px-4 py-2.5 text-sm font-medium rounded-md",
+                isActive("/dashboard")
+                  ? "bg-kahf-blue text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <span className="mr-3">
+                <HomeIcon size={18} />
+              </span>
+              Dashboard
+            </Link>
+          </li>
+          {isAdmin &&
+            menuItems?.map((item, index) => (
+              <li key={index}>
+                <Link
+                  to={item.href}
+                  className={cn(
+                    "flex items-center px-4 py-2.5 text-sm font-medium rounded-md",
+                    isActive(item.href)
+                      ? "bg-kahf-blue text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                  )}
+                >
+                  <span className="mr-3">{item.icon}</span>
+                  {item.name}
+                </Link>
+              </li>
+            ))}
+          <li>
+            <Link
+              to="/dashboard/profile"
+              className={cn(
+                "flex items-center px-4 py-2.5 text-sm font-medium rounded-md",
+                isActive("/dashboard/profile")
+                  ? "bg-kahf-blue text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <span className="mr-3">
+                <ContactRound size={18} />
+              </span>
+              Profile
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/dashboard/control-panel"
+              className={cn(
+                "flex items-center px-4 py-2.5 text-sm font-medium rounded-md",
+                isActive("/dashboard/control-panel")
+                  ? "bg-kahf-blue text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <span className="mr-3">
+                <MonitorCog size={18} />
+              </span>
+              Control Panel
+            </Link>
+          </li>
         </ul>
       </nav>
     </aside>

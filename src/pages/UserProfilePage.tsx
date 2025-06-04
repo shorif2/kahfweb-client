@@ -1,9 +1,8 @@
-
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import ProfileSettings from '@/components/user/ProfileSettings';
-import { Metadata } from '@/components/Metadata';
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import ProfileSettings from "@/components/user/ProfileSettings";
+import { Metadata } from "@/components/Metadata";
 
 const UserProfilePage = () => {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -15,12 +14,12 @@ const UserProfilePage = () => {
 
   // Redirect admins to admin profile page
   if (isAdmin) {
-    return <Navigate to="/admin/profile" replace />;
+    return <Navigate to="/dashboard/profile" replace />;
   }
 
   return (
     <>
-      <Metadata 
+      <Metadata
         title="Profile Settings - KahfWeb"
         description="Manage your KahfWeb account settings and preferences."
       />
