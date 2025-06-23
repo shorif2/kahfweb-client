@@ -48,6 +48,14 @@ export const authApi = apiSlice.injectEndpoints({
         body: credentials,
       }),
     }),
+    updateClient: builder.mutation<any, user>({
+      query: ({ userId, editFormData }) => ({
+        url: `/api/users/user/${userId}`,
+        method: "PATCH",
+        body: editFormData,
+      }),
+      invalidatesTags: ["Users"],
+    }),
     logout: builder.mutation({
       query: (credentials) => ({
         url: "/api/auth/logout",
@@ -66,6 +74,7 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     allUsers: builder.query<any, void>({
       query: () => "/api/users/all-user",
+      providesTags: ["Users"],
     }),
     getUser: builder.query<user, void>({
       query: () => "/api/users/user",
@@ -79,4 +88,5 @@ export const {
   useLogoutMutation,
   useRegisterMutation,
   useAllUsersQuery,
+  useUpdateClientMutation,
 } = authApi;

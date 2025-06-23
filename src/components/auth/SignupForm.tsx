@@ -13,6 +13,7 @@ const SignupForm = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [address, setAddress] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   // const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +33,7 @@ const SignupForm = () => {
       toast.error("You must agree to the Terms and Conditions");
       return;
     }
-    const userData = { name, email, phone, password, role: "user" };
+    const userData = { name, email, phone, password };
     const res = await register(userData);
     if (res.error?.status === 500) {
       toast.success(`${res.error?.data?.message}`);
@@ -41,6 +42,7 @@ const SignupForm = () => {
       setEmail("");
       setPhone("");
       setPassword("");
+      setAddress("");
       setConfirmPassword("");
       setAgreeToTerms(false);
       toast.success(`${res.data?.message}`);
@@ -106,6 +108,17 @@ const SignupForm = () => {
               required
             />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="fullName">Address</Label>
+            <Input
+              id="address"
+              type="text"
+              placeholder="Enter your address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              required
+            />
+          </div>
           <div className="flex items-start space-x-2">
             <Checkbox
               id="terms"
@@ -128,6 +141,7 @@ const SignupForm = () => {
               </Label>
             </div>
           </div>
+
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Creating Account..." : "Sign Up"}
           </Button>

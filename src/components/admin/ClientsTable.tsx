@@ -27,7 +27,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Edit, MoreHorizontal, Plus, User, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { useAllUsersQuery } from "@/redux/features/auth/authApi";
+import {
+  useAllUsersQuery,
+  useUpdateClientMutation,
+} from "@/redux/features/auth/authApi";
 import Loader from "../loader/Loader";
 
 // Sample client data
@@ -94,6 +97,8 @@ const ClientsTable = () => {
   const [currentClient, setCurrentClient] = useState<any>(null);
   const [editFormData, setEditFormData] = useState<any>(null);
   const { data, isLoading } = useAllUsersQuery();
+  const [updateClient, { data: respose, isLoading: updating }] =
+    useUpdateClientMutation();
   // Filter clients based on search query
   const filteredClients = clients.filter((client) => {
     const query = searchQuery.toLowerCase();
@@ -125,7 +130,7 @@ const ClientsTable = () => {
   };
 
   const handleEditClient = (clientId: number) => {
-    const client = clients.find((c) => c.id === clientId);
+    const client = data.find((c) => c._id === clientId);
     setCurrentClient(client);
     setEditFormData({ ...client });
     setIsEditDialogOpen(true);
@@ -141,15 +146,20 @@ const ClientsTable = () => {
     }));
   };
 
-  const handleSaveEdit = () => {
-    setClients(
-      clients.map((client) =>
-        client.id === editFormData.id ? editFormData : client
-      )
-    );
+  const handleSaveEdit = async () => {
+    const response = await updateClient({
+      userId: editFormData?._id,
+      editFormData,
+    });
+    // setClients(
+    //   clients.map((client) =>
+    //     client.id === editFormData.id ? editFormData : client
+    //   )
+    // );
     toast.success("Client updated successfully");
     setIsEditDialogOpen(false);
     setEditFormData(null);
+    console.log(response);
   };
   if (isLoading) return <Loader />;
   return (
@@ -325,9 +335,10 @@ const ClientsTable = () => {
               <div className="space-y-2">
                 <Label htmlFor="mobile">Mobile</Label>
                 <Input
-                  id="mobile"
-                  name="mobile"
-                  value={editFormData.mobile}
+                  id="phone"
+                  type="number"
+                  name="phone"
+                  value={editFormData.phone}
                   onChange={handleEditInputChange}
                 />
               </div>
@@ -383,7 +394,7 @@ const ClientsTable = () => {
               Cancel
             </Button>
             <Button variant="destructive" onClick={confirmDelete}>
-              Delete
+              Block
             </Button>
           </DialogFooter>
         </DialogContent>

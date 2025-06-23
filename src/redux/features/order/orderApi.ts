@@ -6,14 +6,18 @@ import { apiSlice } from "../api/apiSlice";
 //   password: string;
 // };
 
-// type order = {
-//   _id: string;
-//   name: string;
-//   email: string;
-//   phone: string;
-//   role: string;
-//   email_verified: boolean;
-// };
+type order = {
+  _id: string;
+  status: string;
+  item: string;
+  itemName: string;
+  domain: string;
+  expiryDate: string;
+  price: number;
+  user: any;
+  orderDate: string;
+};
+type orderId = string;
 
 // type LoginResponse = {
 //   Success: boolean;
@@ -31,7 +35,7 @@ export const authApi = apiSlice.injectEndpoints({
         method: "POST",
         body: orderInfo,
       }),
-      invalidatesTags: ["Orders"],
+      invalidatesTags: ["Orders", "allOrders", "recentOrder", "summary"],
     }),
     getOrders: builder.query<any>({
       query: (id) => `/api/order/user?id=${id}`,
@@ -39,6 +43,23 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     getAllOrders: builder.query<any, void>({
       query: () => `/api/order/all-orders`,
+      providesTags: ["allOrders"],
+    }),
+    getRecentOrders: builder.query<any, void>({
+      query: () => `/api/order/recent-orders`,
+      providesTags: ["recentOrder"],
+    }),
+    getSummary: builder.query<any, void>({
+      query: () => `/api/order/summary`,
+      providesTags: ["summary"],
+    }),
+    updateOrder: builder.mutation<orderId, order>({
+      query: ({ orderId, editFormData }) => ({
+        url: `/api/order/${orderId}`,
+        method: "PATCH",
+        body: editFormData,
+      }),
+      invalidatesTags: ["allOrders"],
     }),
     logout: builder.mutation({
       query: (credentials) => ({
@@ -62,4 +83,7 @@ export const {
   useLogoutMutation,
   useGetOrdersQuery,
   useGetAllOrdersQuery,
+  useUpdateOrderMutation,
+  useGetRecentOrdersQuery,
+  useGetSummaryQuery,
 } = authApi;

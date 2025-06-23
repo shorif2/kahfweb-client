@@ -182,7 +182,7 @@ const CheckoutPage = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="address">Full Address</Label>
                   <Textarea
                     id="address"
@@ -192,7 +192,7 @@ const CheckoutPage = () => {
                     placeholder="Enter your complete address"
                     rows={3}
                   />
-                </div>
+                </div> */}
 
                 {/* Domain Name field - required for all purchases */}
                 <div className="space-y-2">

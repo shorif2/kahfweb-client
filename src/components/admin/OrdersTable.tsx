@@ -18,8 +18,13 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Edit, Eye, Plus, Search } from "lucide-react";
-import { useGetAllOrdersQuery } from "@/redux/features/order/orderApi";
+import {
+  useCreateOrderMutation,
+  useGetAllOrdersQuery,
+  useUpdateOrderMutation,
+} from "@/redux/features/order/orderApi";
 import Loader from "../loader/Loader";
+import { useAllUsersQuery } from "@/redux/features/auth/authApi";
 
 // Sample order data
 const initialOrders = [
@@ -84,7 +89,17 @@ const initialOrders = [
     transactionId: "TXN321654987",
   },
 ];
-
+type order = {
+  _id: string;
+  status: string;
+  item: string;
+  itemName: string;
+  domain: string;
+  expiryDate: string;
+  price: number;
+  user: any;
+  orderDate: string;
+};
 const OrdersTable = () => {
   const [orders, setOrders] = useState(initialOrders);
   const [searchQuery, setSearchQuery] = useState("");
@@ -93,10 +108,19 @@ const OrdersTable = () => {
   const [isAddHostingDialogOpen, setIsAddHostingDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [currentOrder, setCurrentOrder] = useState<any>(null);
-  const [editFormData, setEditFormData] = useState<any>(null);
+  const [currentOrder, setCurrentOrder] = useState<order>(null);
+  const [editFormData, setEditFormData] = useState<order>(null);
+  const [newOrder, setNewOrder] = useState<any>(null);
   const { data, isLoading } = useGetAllOrdersQuery();
-  console.log(data);
+  const [updateOrder] = useUpdateOrderMutation();
+  const { data: clients = [], isLoading: isLoadingClient } = useAllUsersQuery(
+    undefined,
+    {
+      skip: !isAddDomainDialogOpen,
+    }
+  );
+  const [createOrder, { isLoading: iscreateOrderLoading }] =
+    useCreateOrderMutation();
   // Filter orders based on search query and field
   const filteredOrders = orders.filter((order) => {
     const query = searchQuery.toLowerCase();
@@ -131,7 +155,7 @@ const OrdersTable = () => {
   };
 
   const handleEditOrder = (id: number) => {
-    const order = orders.find((o) => o.id === id);
+    const order = data.orders.find((o) => o._id === id);
     setCurrentOrder(order);
     setEditFormData({ ...order });
     setIsEditDialogOpen(true);
@@ -143,25 +167,48 @@ const OrdersTable = () => {
       [name]: value,
     }));
   };
+  const handlenewOrderInputChange = (name: string, value: string) => {
+    setNewOrder((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
-  const handleSaveEdit = () => {
-    setOrders(
-      orders.map((order) =>
-        order.id === editFormData.id ? editFormData : order
-      )
-    );
+  const handleSaveEdit = async () => {
+    const { user, ...filteredOrder } = editFormData;
+    const response = await updateOrder({
+      orderId: editFormData._id,
+      editFormData: filteredOrder,
+    });
+    console.log(response);
     toast.success("Order updated successfully");
     setIsEditDialogOpen(false);
     setEditFormData(null);
   };
 
-  const handleAddOrder = (type: string) => {
-    toast.success(`New ${type} order added successfully`);
-    if (type === "domain") {
+  const handleAddOrder = async (type: string) => {
+    const res = await createOrder(newOrder);
+    console.log(res);
+    if (res?.data?.order) {
+      toast.success(`New ${type} order added successfully`);
       setIsAddDomainDialogOpen(false);
-    } else if (type === "hosting") {
-      setIsAddHostingDialogOpen(false);
+      setNewOrder(null);
+    } else {
+      toast.error("Something went wrong ");
     }
+    // if (type === "domain") {
+    //   setIsAddDomainDialogOpen(false);
+    // } else if (type === "hosting") {
+    //   setIsAddHostingDialogOpen(false);
+    // }
+  };
+
+  const formatDateForInput = (isoString: string) => {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
   if (isLoading) return <Loader />;
   return (
@@ -177,11 +224,7 @@ const OrdersTable = () => {
             onClick={() => setIsAddDomainDialogOpen(true)}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Add Domain
-          </Button>
-          <Button onClick={() => setIsAddHostingDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Hosting
+            Add Order
           </Button>
         </div>
       </div>
@@ -260,7 +303,7 @@ const OrdersTable = () => {
                       {order?.domain}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {order?.orderDate}
+                      {formatDateForInput(order?.orderDate)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       ${order?.price}
@@ -290,7 +333,7 @@ const OrdersTable = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleEditOrder(order.id)}
+                          onClick={() => handleEditOrder(order._id)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -322,8 +365,10 @@ const OrdersTable = () => {
           {currentOrder && (
             <div className="space-y-4">
               <div>
-                <h3 className="font-semibold text-lg">{currentOrder?.item}</h3>
-                <p className="text-sm text-gray-500">{currentOrder?.type}</p>
+                <h3 className="font-semibold text-lg">
+                  {currentOrder?.domain}
+                </h3>
+                <p className="text-sm text-gray-500">{currentOrder?.item}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -346,11 +391,11 @@ const OrdersTable = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Order Date</p>
-                  <p>{currentOrder?.orderDate}</p>
+                  <p>{formatDateForInput(currentOrder?.orderDate)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Expiry Date</p>
-                  <p>{currentOrder?.expiryDate}</p>
+                  <p>{formatDateForInput(currentOrder?.expiryDate)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Amount</p>
@@ -386,7 +431,7 @@ const OrdersTable = () => {
                   <Label htmlFor="client">Client</Label>
                   <Input
                     id="client"
-                    value={editFormData.client}
+                    value={editFormData?.user?.name}
                     readOnly
                     className="bg-gray-50"
                   />
@@ -395,7 +440,7 @@ const OrdersTable = () => {
                   <Label htmlFor="type">Type</Label>
                   <Input
                     id="type"
-                    value={editFormData.type}
+                    value={editFormData?.item}
                     readOnly
                     className="bg-gray-50"
                   />
@@ -405,30 +450,30 @@ const OrdersTable = () => {
                 <Label htmlFor="item">Item</Label>
                 <Input
                   id="item"
-                  value={editFormData.item}
+                  value={editFormData.domain}
                   readOnly
                   className="bg-gray-50"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="date">Order Date</Label>
+                  <Label htmlFor="orderDate">Order Date</Label>
                   <Input
-                    id="date"
+                    id="orderDate"
                     type="date"
-                    value={editFormData.date}
+                    value={formatDateForInput(editFormData.orderDate) || ""}
                     readOnly
                     className="bg-gray-50"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="expiry">Expiry Date</Label>
+                  <Label htmlFor="expiryDate">Expiry Date</Label>
                   <Input
-                    id="expiry"
+                    id="expiryDate"
                     type="date"
-                    value={editFormData.expiry}
+                    value={formatDateForInput(editFormData.expiryDate) || ""}
                     onChange={(e) =>
-                      handleEditInputChange("expiry", e.target.value)
+                      handleEditInputChange("expiryDate", e.target.value)
                     }
                   />
                 </div>
@@ -436,7 +481,7 @@ const OrdersTable = () => {
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
                 <Select
-                  value={editFormData.status}
+                  value={editFormData?.status}
                   onValueChange={(value) =>
                     handleEditInputChange("status", value)
                   }
@@ -445,17 +490,28 @@ const OrdersTable = () => {
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Pending">Pending</SelectItem>
-                    <SelectItem value="Expired">Expired</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="expired">Expired</SelectItem>
+                    <SelectItem value="canceled">Canceled</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="paymentMethod">Payment Method</Label>
+                <Input
+                  id="paymentMethod"
+                  value={editFormData?.paymentMethod}
+                  onChange={(e) =>
+                    handleEditInputChange("paymentMethod", e.target.value)
+                  }
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="transactionId">Transaction ID</Label>
                 <Input
                   id="transactionId"
-                  value={editFormData.transactionId}
+                  value={editFormData?.transactionId}
                   onChange={(e) =>
                     handleEditInputChange("transactionId", e.target.value)
                   }
@@ -482,55 +538,120 @@ const OrdersTable = () => {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Domain</DialogTitle>
+            <DialogTitle>Add New Order</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="clientSelect">Client</Label>
-              <Select>
+              <Select
+                onValueChange={(value) =>
+                  handlenewOrderInputChange("userId", value)
+                }
+              >
                 <SelectTrigger id="clientSelect">
                   <SelectValue placeholder="Select client" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="acme">Acme Corporation</SelectItem>
-                  <SelectItem value="globex">Globex Inc</SelectItem>
-                  <SelectItem value="stark">Stark Industries</SelectItem>
+                  {isLoading ? (
+                    <SelectItem disabled value="">
+                      Loading...
+                    </SelectItem>
+                  ) : (
+                    clients.map((client) => (
+                      <SelectItem key={client._id} value={client._id}>
+                        {client.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="domainName">Domain Name</Label>
-              <Input id="domainName" placeholder="e.g., example.com" />
+              <Label htmlFor="item">Order Type</Label>
+              <Select
+                value={newOrder?.item}
+                onValueChange={(value) =>
+                  handlenewOrderInputChange("item", value)
+                }
+              >
+                <SelectTrigger id="item">
+                  <SelectValue placeholder="Select Order Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="domain">Domain</SelectItem>
+                  <SelectItem value="hosting">Hosting</SelectItem>
+                  <SelectItem value="bundel">Bundle</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="domain">Domain Name</Label>
+              <Input
+                id="domain"
+                placeholder="e.g., example.com"
+                value={newOrder?.domain}
+                onChange={(e) =>
+                  handlenewOrderInputChange("domain", e.target.value)
+                }
+              />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="registerDate">Registration Date</Label>
-                <Input id="registerDate" type="date" />
+                <Label htmlFor="orderDate">Registration Date</Label>
+                <Input
+                  id="orderDate"
+                  type="date"
+                  // value={formatDateForInput(newOrder?.orderDate) || ""}
+                  onChange={(e) =>
+                    handlenewOrderInputChange("orderDate", e.target.value)
+                  }
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="expiryDate">Expiry Date</Label>
-                <Input id="expiryDate" type="date" />
+                <Input
+                  id="expiryDate"
+                  type="date"
+                  // value={formatDateForInput(newOrder?.expiryDate) || ""}
+                  onChange={(e) =>
+                    handlenewOrderInputChange("expiryDate", e.target.value)
+                  }
+                />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount</Label>
-              <Input id="amount" type="number" placeholder="12.99" />
+              <Label htmlFor="price">Amount</Label>
+              <Input
+                id="price"
+                type="number"
+                placeholder="12.99"
+                value={newOrder?.price}
+                onChange={(e) =>
+                  handlenewOrderInputChange("price", e.target.value)
+                }
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="paymentMethod">Payment Method</Label>
-              <Select>
-                <SelectTrigger id="paymentMethod">
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bKash">bKash</SelectItem>
-                  <SelectItem value="Nagad">Nagad</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+                id="paymentMethod"
+                placeholder="type payment method"
+                value={newOrder?.paymentMethod}
+                onChange={(e) =>
+                  handlenewOrderInputChange("paymentMethod", e.target.value)
+                }
+              />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="transId">Transaction ID</Label>
-              <Input id="transId" placeholder="e.g., TXN123456789" />
+              <Label htmlFor="transactionId">Transaction ID</Label>
+              <Input
+                id="transactionId"
+                placeholder="e.g., TXN123456789"
+                value={newOrder?.transactionId}
+                onChange={(e) =>
+                  handlenewOrderInputChange("transactionId", e.target.value)
+                }
+              />
             </div>
           </div>
           <DialogFooter>
@@ -541,100 +662,6 @@ const OrdersTable = () => {
               Cancel
             </Button>
             <Button onClick={() => handleAddOrder("domain")}>Add Domain</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add Hosting Dialog */}
-      <Dialog
-        open={isAddHostingDialogOpen}
-        onOpenChange={setIsAddHostingDialogOpen}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add New Hosting</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="hostingClient">Client</Label>
-              <Select>
-                <SelectTrigger id="hostingClient">
-                  <SelectValue placeholder="Select client" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="acme">Acme Corporation</SelectItem>
-                  <SelectItem value="globex">Globex Inc</SelectItem>
-                  <SelectItem value="stark">Stark Industries</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="hostingPlan">Hosting Plan</Label>
-              <Select>
-                <SelectTrigger id="hostingPlan">
-                  <SelectValue placeholder="Select hosting plan" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="basic">Basic Hosting</SelectItem>
-                  <SelectItem value="premium">Premium Hosting</SelectItem>
-                  <SelectItem value="business">Business Hosting</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="associatedDomain">Associated Domain</Label>
-              <Select>
-                <SelectTrigger id="associatedDomain">
-                  <SelectValue placeholder="Select domain" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="acmecorp.com">acmecorp.com</SelectItem>
-                  <SelectItem value="globex.com">globex.com</SelectItem>
-                  <SelectItem value="stark.com">stark.com</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="hostingStartDate">Start Date</Label>
-                <Input id="hostingStartDate" type="date" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="hostingEndDate">End Date</Label>
-                <Input id="hostingEndDate" type="date" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="hostingAmount">Amount</Label>
-              <Input id="hostingAmount" type="number" placeholder="89.99" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="hostingPaymentMethod">Payment Method</Label>
-              <Select>
-                <SelectTrigger id="hostingPaymentMethod">
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bKash">bKash</SelectItem>
-                  <SelectItem value="Nagad">Nagad</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="hostingTransId">Transaction ID</Label>
-              <Input id="hostingTransId" placeholder="e.g., TXN123456789" />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsAddHostingDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={() => handleAddOrder("hosting")}>
-              Add Hosting
-            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

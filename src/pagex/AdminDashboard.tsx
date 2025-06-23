@@ -27,53 +27,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-
-const statCards = [
-  {
-    title: "Total Clients",
-    value: 12,
-    change: "+2 this month",
-    icon: <Users className="h-8 w-8 text-kahf-blue" />,
-    action: {
-      text: "Add Client",
-      icon: <UserPlus className="h-4 w-4 mr-1" />,
-      type: "client",
-    },
-  },
-  {
-    title: "Active Domains",
-    value: 24,
-    change: "+3 this month",
-    icon: <Globe className="h-8 w-8 text-kahf-indigo" />,
-    action: {
-      text: "Add Domain",
-      icon: <Plus className="h-4 w-4 mr-1" />,
-      type: "domain",
-    },
-  },
-  {
-    title: "Active Hostings",
-    value: 18,
-    change: "+1 this month",
-    icon: <Server className="h-8 w-8 text-kahf-green" />,
-    action: {
-      text: "Add Hosting",
-      icon: <Plus className="h-4 w-4 mr-1" />,
-      type: "hosting",
-    },
-  },
-  {
-    title: "Expiring Soon",
-    value: 5,
-    change: "Within 30 days",
-    icon: <AlertCircle className="h-8 w-8 text-amber-500" />,
-    action: {
-      text: "View All",
-      icon: null,
-      type: "view-expiring",
-    },
-  },
-];
+import {
+  useGetRecentOrdersQuery,
+  useGetSummaryQuery,
+} from "@/redux/features/order/orderApi";
+import Loader from "@/components/loader/Loader";
+import { useRegisterMutation } from "@/redux/features/auth/authApi";
 
 const recentActivity = [
   {
@@ -157,7 +116,56 @@ const expiringItems = [
 const AdminDashboard = () => {
   const [dialogType, setDialogType] = useState<string | null>(null);
   const [viewItemId, setViewItemId] = useState<number | null>(null);
-
+  const [clientData, setClientData] = useState({});
+  const { data, isLoading } = useGetRecentOrdersQuery();
+  const [register] = useRegisterMutation();
+  const { data: summary, isLoading: summaryLoading } = useGetSummaryQuery();
+  const statCards = [
+    {
+      title: "Total Clients",
+      value: summary?.totalUsers ?? 0,
+      change: "+2 this month",
+      icon: <Users className="h-8 w-8 text-kahf-blue" />,
+      action: {
+        text: "Add Client",
+        icon: <UserPlus className="h-4 w-4 mr-1" />,
+        type: "client",
+      },
+    },
+    {
+      title: "Active Domains",
+      value: summary?.activeDomains ?? 0,
+      change: "+3 this month",
+      icon: <Globe className="h-8 w-8 text-kahf-indigo" />,
+      action: {
+        text: "Add Domain",
+        icon: <Plus className="h-4 w-4 mr-1" />,
+        type: "domain",
+      },
+    },
+    {
+      title: "Active Hostings",
+      value: summary?.activeHostings ?? 0,
+      change: "+1 this month",
+      icon: <Server className="h-8 w-8 text-kahf-green" />,
+      action: {
+        text: "Add Hosting",
+        icon: <Plus className="h-4 w-4 mr-1" />,
+        type: "hosting",
+      },
+    },
+    {
+      title: "Expiring Soon",
+      value: summary?.totalExpireSoon ?? 0,
+      change: "Within 30 days",
+      icon: <AlertCircle className="h-8 w-8 text-amber-500" />,
+      action: {
+        text: "View All",
+        icon: null,
+        type: "view-expiring",
+      },
+    },
+  ];
   const handleActionClick = (type: string) => {
     setDialogType(type);
   };
@@ -178,11 +186,35 @@ const AdminDashboard = () => {
     );
     handleCloseDialog();
   };
+  const handleEditInputChange = (name: string, value: string) => {
+    setClientData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  const handleAddClient = async () => {
+    console.log(clientData);
+    const res = await register(clientData);
 
-  const getActivityDetail = () => {
-    return recentActivity.find((activity) => activity.id === viewItemId);
+    if (res.error?.status === 500) {
+      toast.error(`${res.error?.data?.message}`);
+    } else if (res.data?.message) {
+      toast.success(`${res.data?.message}`);
+    }
+    console.log(res);
   };
 
+  const getActivityDetail = () => {
+    return data?.orders.find((activity) => activity._id === viewItemId);
+  };
+  const formatDateForInput = (isoString: string) => {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+  if (isLoading) return <Loader />;
   return (
     <div>
       <div className="mb-8">
@@ -193,8 +225,8 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
-        {statCards.map((card, index) => (
-          <Card key={index} className="overflow-hidden">
+        {statCards.map((card) => (
+          <Card key={card.title} className="overflow-hidden">
             <CardHeader className="p-4 pb-2">
               <div className="flex justify-between items-start">
                 <CardTitle className="text-base font-medium text-gray-600">
@@ -205,7 +237,7 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent className="p-4 pt-0">
               <div className="flex justify-between items-baseline">
-                <p className="text-3xl font-bold">{card.value}</p>
+                <p className="text-3xl font-bold">{card?.value}</p>
                 <p className="text-sm text-gray-500">{card.change}</p>
               </div>
               <Button
@@ -228,70 +260,74 @@ const AdminDashboard = () => {
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-y border-gray-200">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Client
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Domain
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {recentActivity.map((activity, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {activity.client}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                      {activity.type}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                      {activity.domain}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                      {activity.date}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          activity.status === "Active"
-                            ? "bg-green-100 text-green-800"
-                            : activity.status === "Expiring"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {activity.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewClick(activity.id)}
-                      >
-                        View
-                      </Button>
-                    </td>
+            {data?.orders.length ? (
+              <table className="w-full">
+                <thead className="bg-gray-50 border-y border-gray-200">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Client
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Domain
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {data?.orders?.map((activity) => (
+                    <tr key={activity._id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {activity?.user?.name}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {activity.item}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {activity.domain}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        {formatDateForInput(activity?.createdAt) || "N/A"}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            activity.status === "Active"
+                              ? "bg-green-100 text-green-800"
+                              : activity.status === "Expiring"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {activity.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewClick(activity._id)}
+                        >
+                          View
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <h1 className="p-8 text-center">No recently order</h1>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -308,26 +344,49 @@ const AdminDashboard = () => {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="name">Client Name</Label>
-              <Input id="name" placeholder="e.g. Acme Corporation" />
+              <Input
+                id="name"
+                placeholder="e.g. Acme Corporation"
+                value={clientData?.name}
+                onChange={(e) => handleEditInputChange("name", e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
-              <Input id="email" type="email" placeholder="client@example.com" />
+              <Input
+                id="email"
+                type="email"
+                placeholder="client@example.com"
+                value={clientData?.email}
+                onChange={(e) => handleEditInputChange("email", e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
-              <Input id="phone" placeholder="+1 (555) 123-4567" />
+              <Input
+                id="phone"
+                placeholder="+1 (555) 123-4567"
+                value={clientData?.phone}
+                onChange={(e) => handleEditInputChange("phone", e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="address">Address</Label>
-              <Textarea id="address" placeholder="Client's address" />
+              <Textarea
+                id="address"
+                placeholder="Client's address"
+                value={clientData?.address}
+                onChange={(e) =>
+                  handleEditInputChange("address", e.target.value)
+                }
+              />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={handleCloseDialog}>
               Cancel
             </Button>
-            <Button onClick={() => handleAddItem("client")}>Add Client</Button>
+            <Button onClick={handleAddClient}>Add Client</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -468,11 +527,13 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-500">Client</p>
-                    <p className="font-medium">{getActivityDetail()?.client}</p>
+                    <p className="font-medium">
+                      {getActivityDetail()?.user.name}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Type</p>
-                    <p className="font-medium">{getActivityDetail()?.type}</p>
+                    <p className="font-medium">{getActivityDetail()?.item}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Domain/Service</p>
@@ -480,7 +541,9 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Date</p>
-                    <p className="font-medium">{getActivityDetail()?.date}</p>
+                    <p className="font-medium">
+                      {formatDateForInput(getActivityDetail()?.createdAt)}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Status</p>
@@ -504,8 +567,8 @@ const AdminDashboard = () => {
                   </p>
                   <p>
                     This is a detailed view of the{" "}
-                    {getActivityDetail()?.type.toLowerCase()} activity for{" "}
-                    {getActivityDetail()?.client}.
+                    {getActivityDetail()?.item?.toLowerCase()} activity for{" "}
+                    {getActivityDetail()?.user?.name}.
                   </p>
                   <p className="mt-2">
                     You can add more details or actions related to this activity
@@ -553,23 +616,23 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {expiringItems.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-50">
+                  {summary?.expireSoon?.map((item) => (
+                    <tr key={item._id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {item.client}
+                        {item.userId?.name}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                        {item.email}
+                        {item.userId?.email}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                        {item.phone}
+                        {item?.userId?.phone}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                        {item.service}
+                        {item.item}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                          {item.expireDate}
+                          {item?.expiryDate}
                         </span>
                       </td>
                     </tr>
