@@ -1,5 +1,14 @@
 import { apiSlice } from "../api/apiSlice";
-
+type paymentMethodResponse = {
+  logo: string;
+  isActive: boolean;
+  currency: string;
+  payAmount: number;
+  instructions: string;
+  accountNumber: number;
+  name: string;
+  qrCode: string;
+};
 export const paymentMethodApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     addPaymentMethod: builder.mutation<any>({
@@ -10,12 +19,31 @@ export const paymentMethodApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["paymentMethods"],
     }),
-    getPaymentMethod: builder.query({
+    updatePaymentMethod: builder.mutation<any>({
+      query: ({ currentMethod, id }) => ({
+        url: `/api/payment-method/${id}`,
+        method: "PATCH",
+        body: currentMethod,
+      }),
+      invalidatesTags: ["paymentMethods"],
+    }),
+    deletePaymentMethod: builder.mutation<any>({
+      query: (paymentMethodId) => ({
+        url: `/api/payment-method/${paymentMethodId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["paymentMethods"],
+    }),
+    getPaymentMethod: builder.query<paymentMethodResponse>({
       query: () => `/api/payment-method`,
-      // providesTags: ["paymentMethods"],
+      providesTags: ["paymentMethods"],
     }),
   }),
 });
 
-export const { useAddPaymentMethodMutation, useGetPaymentMethodQuery } =
-  paymentMethodApi;
+export const {
+  useAddPaymentMethodMutation,
+  useGetPaymentMethodQuery,
+  useDeletePaymentMethodMutation,
+  useUpdatePaymentMethodMutation,
+} = paymentMethodApi;

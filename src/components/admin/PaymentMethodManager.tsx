@@ -23,10 +23,13 @@ import { Plus, Edit, Trash2, Upload } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   useAddPaymentMethodMutation,
+  useDeletePaymentMethodMutation,
   useGetPaymentMethodQuery,
+  useUpdatePaymentMethodMutation,
 } from "@/redux/features/payment/paymentMethod";
 
 interface PaymentMethod {
+  _id: string;
   name: string;
   accountNumber: string;
   instructions: string;
@@ -42,6 +45,7 @@ const PaymentMethodManager = () => {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]); // payment method
   const [isEditing, setIsEditing] = useState(false);
   const [currentMethod, setCurrentMethod] = useState<PaymentMethod>({
+    _id: "",
     name: "",
     accountNumber: "",
     instructions: "",
@@ -51,7 +55,9 @@ const PaymentMethodManager = () => {
   });
   const [addPaymentMethod] = useAddPaymentMethodMutation();
   const { data, isLoading } = useGetPaymentMethodQuery();
-  console.log(data);
+  const [updatePaymentMethod] = useUpdatePaymentMethodMutation();
+  const [deletePaymentMethod] = useDeletePaymentMethodMutation();
+
   // File input references
   const logoInputRef = React.useRef<HTMLInputElement>(null);
   const qrCodeInputRef = React.useRef<HTMLInputElement>(null);
@@ -167,19 +173,34 @@ const PaymentMethodManager = () => {
   const handleAddPaymentMethod = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (isEditing) {
+        console.log(currentMethod?._id);
+        const res = await updatePaymentMethod({
+          currentMethod,
+          id: currentMethod?._id,
+        });
+        if (res.data.success) {
+          resetForm();
+          toast({
+            title: "Payment Method Updated",
+            description: `Payment Method Updated Successfully.`,
+          });
+        }
+        return;
+      }
       const res = await addPaymentMethod(currentMethod);
 
-      if (res.data.success) {
+      if (res?.data?.success) {
         toast({
           title: "Payment Method Added",
           description: `${currentMethod.name} as a payment method has been added successfully.`,
         });
         console.log(res);
-      } else if (res.error) {
+      } else if (res?.error) {
         console.log(res);
         toast({
           title: "Error",
-          description: res.error?.data?.message,
+          description: res?.error?.data?.message,
           variant: "destructive",
         });
       } else {
@@ -204,16 +225,26 @@ const PaymentMethodManager = () => {
     setIsEditing(true);
   };
 
-  const deletePaymentMethod = (id: string) => {
-    const methodToDelete = paymentMethods.find((m) => m.id === id);
-    if (methodToDelete) {
-      const updatedMethods = paymentMethods.filter(
-        (method) => method.id !== id
-      );
-      setPaymentMethods(updatedMethods);
+  const handleDeleteMethod = async (id: string) => {
+    try {
+      const res = await deletePaymentMethod(id);
+      if (res.data.success) {
+        toast({
+          title: "Payment Method Deleted",
+          description: `Payment Method has been removed.`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Could not able to delete",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
       toast({
-        title: "Payment Method Deleted",
-        description: `${methodToDelete.name} has been removed.`,
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
       });
     }
   };
@@ -430,7 +461,7 @@ const PaymentMethodManager = () => {
                         <Button
                           variant="outline"
                           size="icon"
-                          onClick={() => deletePaymentMethod(method.id)}
+                          onClick={() => handleDeleteMethod(method._id)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
