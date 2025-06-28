@@ -26,6 +26,7 @@ import {
   useDeletePaymentMethodMutation,
   useGetPaymentMethodQuery,
   useUpdatePaymentMethodMutation,
+  useUpdateStatusMutation,
 } from "@/redux/features/payment/paymentMethod";
 
 interface PaymentMethod {
@@ -57,7 +58,8 @@ const PaymentMethodManager = () => {
   const { data, isLoading } = useGetPaymentMethodQuery();
   const [updatePaymentMethod] = useUpdatePaymentMethodMutation();
   const [deletePaymentMethod] = useDeletePaymentMethodMutation();
-
+  const [updateStatus] = useUpdateStatusMutation();
+  console.log(data);
   // File input references
   const logoInputRef = React.useRef<HTMLInputElement>(null);
   const qrCodeInputRef = React.useRef<HTMLInputElement>(null);
@@ -248,6 +250,29 @@ const PaymentMethodManager = () => {
       });
     }
   };
+  const handleUpdateStatus = async (id: string) => {
+    try {
+      const res = await updateStatus(id);
+      if (res.data.success) {
+        toast({
+          title: "Payment Method Deleted",
+          description: `Payment Method has been removed.`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Could not able to delete",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -417,12 +442,13 @@ const PaymentMethodManager = () => {
                   <TableHead>Currency</TableHead>
                   <TableHead>Pay Amount</TableHead>
                   <TableHead>QR Code</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data?.data?.map((method) => (
-                  <TableRow key={method._id}>
+                  <TableRow key={method._id} className="relative">
                     <TableCell>
                       <Avatar className="h-8 w-8">
                         {method.logo ? (
@@ -448,6 +474,26 @@ const PaymentMethodManager = () => {
                           />
                         </div>
                       )}
+                    </TableCell>
+                    <TableCell className=" ">
+                      <div className="">
+                        {method?.isActive ? (
+                          <span className="text-green-500">Active</span>
+                        ) : (
+                          <div className="relative group ">
+                            <div className="group-hover:hidden text-red-500">
+                              Inactive
+                            </div>
+                            <button
+                              disabled={isLoading}
+                              onClick={() => handleUpdateStatus(method._id)}
+                              className="hidden group-hover:inline bg-green-500 px-1 text-white   rounded z-[50] relative"
+                            >
+                              Activate
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">

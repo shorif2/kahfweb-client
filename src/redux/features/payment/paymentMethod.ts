@@ -34,9 +34,19 @@ export const paymentMethodApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["paymentMethods"],
     }),
+    updateStatus: builder.mutation<any>({
+      query: (paymentMethodId) => ({
+        url: `/api/payment-method/update/${paymentMethodId}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["paymentMethods"],
+    }),
     getPaymentMethod: builder.query<paymentMethodResponse>({
       query: () => `/api/payment-method`,
       providesTags: ["paymentMethods"],
+    }),
+    getActiveMethod: builder.query<paymentMethodResponse>({
+      query: () => `/api/payment-method/active`,
     }),
   }),
 });
@@ -46,4 +56,6 @@ export const {
   useGetPaymentMethodQuery,
   useDeletePaymentMethodMutation,
   useUpdatePaymentMethodMutation,
+  useUpdateStatusMutation,
+  useGetActiveMethodQuery,
 } = paymentMethodApi;

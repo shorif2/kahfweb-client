@@ -133,7 +133,7 @@ const ServiceList = () => {
     const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return daysLeft;
   };
-  console.log(data?.orders);
+
   if (isLoading) return <Loader />;
   if (data.orders.length === 0)
     return (

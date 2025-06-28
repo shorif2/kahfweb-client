@@ -13,6 +13,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useCreateOrderMutation } from "@/redux/features/order/orderApi";
+import { useGetActiveMethodQuery } from "@/redux/features/payment/paymentMethod";
 
 interface ProductType {
   name: string;
@@ -44,7 +45,9 @@ const CheckoutPage = () => {
   const [transactionId, setTransactionId] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [domainName, setDomainName] = useState(location.state?.domain || "");
+  const { data } = useGetActiveMethodQuery();
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+
   const [formData, setFormData] = useState({
     fullName: user?.name || "",
     email: user?.email || "",
@@ -64,14 +67,6 @@ const CheckoutPage = () => {
     price: 60.0,
     description: "Register a new domain name",
   };
-
-  // Load payment methods from localStorage on component mount
-  useEffect(() => {
-    const storedMethods = localStorage.getItem("kahfweb_payment_methods");
-    if (storedMethods) {
-      setPaymentMethods(JSON.parse(storedMethods));
-    }
-  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -108,6 +103,7 @@ const CheckoutPage = () => {
       item: selectedProduct.item,
       price: selectedProduct.price,
       domain: domainName,
+      transactionId,
     };
     const res = await createOrder(orderInfo);
     if (res?.data?.order) {
@@ -117,11 +113,6 @@ const CheckoutPage = () => {
       toast.error("Something went wrong or domin already orderd");
     }
   };
-
-  // Get the selected payment method details
-  const selectedPaymentMethod = paymentMethods.find(
-    (method) => method.id === selectedPayment
-  );
 
   return (
     <>
@@ -258,10 +249,10 @@ const CheckoutPage = () => {
               <h2 className="text-xl font-semibold mb-6">Payment Method</h2>
 
               <div className="space-y-6">
-                {paymentMethods.length > 0 ? (
-                  paymentMethods.map((method) => (
+                {data?.data?.length > 0 ? (
+                  data?.data?.map((method) => (
                     <div
-                      key={method.id}
+                      key={method._id}
                       className={`border rounded-lg p-4 cursor-pointer transition-all ${
                         selectedPayment === method.id
                           ? "border-kahf-blue bg-blue-50"
