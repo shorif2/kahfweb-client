@@ -156,6 +156,14 @@ const OrdersTable = () => {
 
   const handleEditOrder = (id: number) => {
     const order = data.orders.find((o) => o._id === id);
+    console.log(
+      "Order status:",
+      order?.status,
+      "Type:",
+      typeof order?.status,
+      "Length:",
+      order?.status?.length
+    );
     setCurrentOrder(order);
     setEditFormData({ ...order });
     setIsEditDialogOpen(true);
@@ -180,7 +188,7 @@ const OrdersTable = () => {
       orderId: editFormData._id,
       editFormData: filteredOrder,
     });
-    console.log(response);
+
     toast.success("Order updated successfully");
     setIsEditDialogOpen(false);
     setEditFormData(null);
@@ -209,6 +217,22 @@ const OrdersTable = () => {
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
+  };
+
+  const getStatusColor = (status: string) => {
+    const statusLower = status?.toLowerCase();
+    switch (statusLower) {
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "expired":
+        return "bg-red-100 text-red-800";
+      case "canceled":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   };
   if (isLoading) return <Loader />;
   return (
@@ -310,13 +334,9 @@ const OrdersTable = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          order?.status === "Active"
-                            ? "bg-green-100 text-green-800"
-                            : order?.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                          order?.status
+                        )}`}
                       >
                         {order?.status}
                       </span>
@@ -378,13 +398,9 @@ const OrdersTable = () => {
                 <div>
                   <p className="text-sm text-gray-500">Status</p>
                   <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      currentOrder?.status === "Active"
-                        ? "bg-green-100 text-green-800"
-                        : currentOrder?.status === "Pending"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                      currentOrder?.status
+                    )}`}
                   >
                     {currentOrder?.status}
                   </span>
@@ -462,8 +478,9 @@ const OrdersTable = () => {
                     id="orderDate"
                     type="date"
                     value={formatDateForInput(editFormData.orderDate) || ""}
-                    readOnly
-                    className="bg-gray-50"
+                    onChange={(e) =>
+                      handleEditInputChange("orderDate", e.target.value)
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -480,8 +497,9 @@ const OrdersTable = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
+
                 <Select
-                  value={editFormData?.status}
+                  value={editFormData?.status || "pending"}
                   onValueChange={(value) =>
                     handleEditInputChange("status", value)
                   }
@@ -491,7 +509,6 @@ const OrdersTable = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="expired">Expired</SelectItem>
                     <SelectItem value="canceled">Canceled</SelectItem>
                   </SelectContent>
@@ -526,7 +543,7 @@ const OrdersTable = () => {
             >
               Cancel
             </Button>
-            <Button onClick={handleSaveEdit}>Save Changes</Button>
+            <Button onClick={handleSaveEdit}>Update Order</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -580,7 +597,7 @@ const OrdersTable = () => {
                 <SelectContent>
                   <SelectItem value="domain">Domain</SelectItem>
                   <SelectItem value="hosting">Hosting</SelectItem>
-                  <SelectItem value="bundel">Bundle</SelectItem>
+                  <SelectItem value="bundle">Bundle</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -661,7 +678,7 @@ const OrdersTable = () => {
             >
               Cancel
             </Button>
-            <Button onClick={() => handleAddOrder("domain")}>Add Domain</Button>
+            <Button onClick={() => handleAddOrder("domain")}>Add Order</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

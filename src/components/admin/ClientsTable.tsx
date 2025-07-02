@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import {
   useAllUsersQuery,
   useUpdateClientMutation,
+  useRegisterMutation,
 } from "@/redux/features/auth/authApi";
 import Loader from "../loader/Loader";
 
@@ -93,12 +94,15 @@ const ClientsTable = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddClientDialogOpen, setIsAddClientDialogOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<number | null>(null);
   const [currentClient, setCurrentClient] = useState<any>(null);
   const [editFormData, setEditFormData] = useState<any>(null);
+  const [newClient, setNewClient] = useState<any>({});
   const { data, isLoading } = useAllUsersQuery();
   const [updateClient, { data: respose, isLoading: updating }] =
     useUpdateClientMutation();
+  const [register, { isLoading: isRegistering }] = useRegisterMutation();
   // Filter clients based on search query
   const filteredClients = clients.filter((client) => {
     const query = searchQuery.toLowerCase();
@@ -161,6 +165,37 @@ const ClientsTable = () => {
     setEditFormData(null);
     console.log(response);
   };
+
+  const handleNewClientInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setNewClient((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleAddClient = async () => {
+    try {
+      const response = await register(newClient);
+
+      if (response?.data?.message) {
+        toast.success("Client added successfully");
+        setIsAddClientDialogOpen(false);
+        setNewClient({
+          name: "",
+          email: "",
+          phone: "",
+          address: "",
+        });
+      } else {
+        toast.error("Failed to add client");
+      }
+    } catch (error) {
+      toast.error("Something went wrong");
+    }
+  };
   if (isLoading) return <Loader />;
   return (
     <div className="space-y-6">
@@ -171,11 +206,9 @@ const ClientsTable = () => {
             Manage your clients and their services
           </p>
         </div>
-        <Button asChild>
-          <a href="/admin/clients/new" className="inline-flex items-center">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Client
-          </a>
+        <Button onClick={() => setIsAddClientDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Client
         </Button>
       </div>
 
@@ -396,6 +429,70 @@ const ClientsTable = () => {
             <Button variant="destructive" onClick={confirmDelete}>
               Block
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Client Dialog */}
+      <Dialog
+        open={isAddClientDialogOpen}
+        onOpenChange={setIsAddClientDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Client</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Client Name</Label>
+              <Input
+                id="name"
+                name="name"
+                placeholder="e.g. Acme Corporation"
+                value={newClient?.name}
+                onChange={handleNewClientInputChange}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                name="email"
+                placeholder="client@example.com"
+                value={newClient?.email}
+                onChange={handleNewClientInputChange}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                name="phone"
+                placeholder="+1 (555) 123-4567"
+                value={newClient?.phone}
+                onChange={handleNewClientInputChange}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="address">Address</Label>
+              <Textarea
+                id="address"
+                name="address"
+                placeholder="Client's address"
+                value={newClient?.address}
+                onChange={handleNewClientInputChange}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsAddClientDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleAddClient}>Add Client</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

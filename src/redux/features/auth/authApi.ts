@@ -47,6 +47,7 @@ export const authApi = apiSlice.injectEndpoints({
         method: "POST",
         body: credentials,
       }),
+      invalidatesTags: ["Users", "summary"],
     }),
     updateClient: builder.mutation<any, user>({
       query: ({ userId, editFormData }) => ({

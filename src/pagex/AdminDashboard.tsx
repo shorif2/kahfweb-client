@@ -33,6 +33,7 @@ import {
 } from "@/redux/features/order/orderApi";
 import Loader from "@/components/loader/Loader";
 import { useRegisterMutation } from "@/redux/features/auth/authApi";
+import { set } from "date-fns";
 
 const recentActivity = [
   {
@@ -199,7 +200,9 @@ const AdminDashboard = () => {
     if (res.error?.status === 500) {
       toast.error(`${res.error?.data?.message}`);
     } else if (res.data?.message) {
-      toast.success(`${res.data?.message}`);
+      toast.success(`User created successfully`);
+      setClientData({});
+      handleCloseDialog();
     }
     console.log(res);
   };

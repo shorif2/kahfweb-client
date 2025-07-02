@@ -33,10 +33,12 @@ const SignupForm = () => {
       toast.error("You must agree to the Terms and Conditions");
       return;
     }
-    const userData = { name, email, phone, password };
+    console.log(address);
+    const userData = { name, email, phone, password, address };
     const res = await register(userData);
+    console.log(res);
     if (res.error?.status === 500) {
-      toast.success(`${res.error?.data?.message}`);
+      toast.error(`${res.error?.data?.message}`);
     } else if (res.data?.message) {
       setName("");
       setEmail("");
