@@ -31,6 +31,7 @@ import {
   useAllUsersQuery,
   useUpdateClientMutation,
   useRegisterMutation,
+  useBlockUserMutation,
 } from "@/redux/features/auth/authApi";
 import Loader from "../loader/Loader";
 
@@ -95,7 +96,8 @@ const ClientsTable = () => {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddClientDialogOpen, setIsAddClientDialogOpen] = useState(false);
-  const [clientToDelete, setClientToDelete] = useState<number | null>(null);
+  const [clientToBlock, setClientToBlock] = useState<any>(null);
+  const [actionType, setActionType] = useState<"block" | "unblock">("block");
   const [currentClient, setCurrentClient] = useState<any>(null);
   const [editFormData, setEditFormData] = useState<any>(null);
   const [newClient, setNewClient] = useState<any>({});
@@ -103,6 +105,7 @@ const ClientsTable = () => {
   const [updateClient, { data: respose, isLoading: updating }] =
     useUpdateClientMutation();
   const [register, { isLoading: isRegistering }] = useRegisterMutation();
+  const [blockUser, { isLoading: isBlocking }] = useBlockUserMutation();
   // Filter clients based on search query
   const filteredClients = clients.filter((client) => {
     const query = searchQuery.toLowerCase();
@@ -113,18 +116,33 @@ const ClientsTable = () => {
     );
   });
 
-  const handleDeleteClient = (clientId: number) => {
-    setClientToDelete(clientId);
+  const handleBlockClient = (clientId: string, type: "block" | "unblock") => {
+    const client = data.find((c) => c._id === clientId);
+    setClientToBlock(client);
+    setActionType(type);
     setIsDeleteDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    if (clientToDelete) {
-      setClients(clients.filter((client) => client.id !== clientToDelete));
-      toast.success("Client deleted successfully");
+  const confirmBlock = async () => {
+    if (clientToBlock) {
+      try {
+        await blockUser({
+          userId: clientToBlock._id,
+          status: actionType === "block" ? "blocked" : "active",
+        }).unwrap();
+        toast.success(
+          `Client ${
+            actionType === "block" ? "blocked" : "unblocked"
+          } successfully`
+        );
+      } catch (error) {
+        toast.error(
+          `Failed to ${actionType === "block" ? "block" : "unblock"} client`
+        );
+      }
     }
     setIsDeleteDialogOpen(false);
-    setClientToDelete(null);
+    setClientToBlock(null);
   };
 
   const handleViewClient = (clientId: number) => {
@@ -268,13 +286,39 @@ const ClientsTable = () => {
                           <Edit className="mr-2 h-4 w-4" />
                           <span>Edit</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteClient(client._id)}
-                          className="text-red-600 focus:text-red-600"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          <span>Delete</span>
-                        </DropdownMenuItem>
+                        {client.status === "blocked" ? (
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleBlockClient(client._id, "unblock")
+                            }
+                            className="text-green-600 focus:text-green-600"
+                          >
+                            <svg
+                              className="mr-2 h-4 w-4 text-green-600"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                            <span>Unblock</span>
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleBlockClient(client._id, "block")
+                            }
+                            className="text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>Block</span>
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -413,10 +457,13 @@ const ClientsTable = () => {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogTitle>
+              {actionType === "block" ? "Confirm Block" : "Confirm Unblock"}
+            </DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this client? This action cannot be
-              undone.
+              {actionType === "block"
+                ? "Are you sure you want to block this client? This action can be undone by unblocking later."
+                : "Are you sure you want to unblock this client? They will regain access to their account."}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -426,8 +473,18 @@ const ClientsTable = () => {
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              Block
+            <Button
+              variant={actionType === "block" ? "destructive" : "default"}
+              onClick={confirmBlock}
+              disabled={isBlocking}
+            >
+              {isBlocking
+                ? actionType === "block"
+                  ? "Blocking..."
+                  : "Unblocking..."
+                : actionType === "block"
+                ? "Block Client"
+                : "Unblock Client"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -80,6 +80,14 @@ export const authApi = apiSlice.injectEndpoints({
     getUser: builder.query<user, void>({
       query: () => "/api/users/user",
     }),
+    blockUser: builder.mutation<any, { userId: string; status: string }>({
+      query: ({ userId, status }) => ({
+        url: `/api/users/block-user/${userId}`,
+        method: "PATCH",
+        body: { status },
+      }),
+      invalidatesTags: ["Users"],
+    }),
   }),
 });
 
@@ -90,4 +98,5 @@ export const {
   useRegisterMutation,
   useAllUsersQuery,
   useUpdateClientMutation,
+  useBlockUserMutation,
 } = authApi;
