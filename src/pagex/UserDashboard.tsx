@@ -1,4 +1,3 @@
-import { Navigate } from "react-router-dom";
 import DashboardHeader from "@/components/user/DashboardHeader";
 import ServiceList from "@/components/user/ServiceList";
 import { useSelector } from "react-redux";

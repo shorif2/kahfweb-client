@@ -1,9 +1,7 @@
-
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import ProfileSettings from '@/components/user/ProfileSettings';
-import { Metadata } from '@/components/Metadata';
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import ProfileSettings from "@/components/user/ProfileSettings";
+import { Metadata } from "@/components/Metadata";
 
 const AdminProfilePage = () => {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -20,7 +18,7 @@ const AdminProfilePage = () => {
 
   return (
     <>
-      <Metadata 
+      <Metadata
         title="Admin Profile Settings - KahfWeb"
         description="Manage your KahfWeb admin account settings and preferences."
       />

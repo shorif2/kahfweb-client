@@ -1,12 +1,10 @@
-
-import React from 'react';
-import SignupForm from '@/components/auth/SignupForm';
-import { Metadata } from '@/components/Metadata';
+import SignupForm from "@/components/auth/SignupForm";
+import { Metadata } from "@/components/Metadata";
 
 const SignupPage = () => {
   return (
     <>
-      <Metadata 
+      <Metadata
         title="Sign Up - KahfWeb"
         description="Create your KahfWeb account to start managing your domains and hosting services."
       />

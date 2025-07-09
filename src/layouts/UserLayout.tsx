@@ -1,7 +1,4 @@
 import AdminSidebar from "@/components/admin/Sidebar";
-import Navbar from "@/components/layout/Navbar";
-import React from "react";
-import { Footer } from "react-day-picker";
 import { Outlet } from "react-router-dom";
 
 const UserLayout = () => {

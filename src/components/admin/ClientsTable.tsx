@@ -173,11 +173,6 @@ const ClientsTable = () => {
       userId: editFormData?._id,
       editFormData,
     });
-    // setClients(
-    //   clients.map((client) =>
-    //     client.id === editFormData.id ? editFormData : client
-    //   )
-    // );
     toast.success("Client updated successfully");
     setIsEditDialogOpen(false);
     setEditFormData(null);

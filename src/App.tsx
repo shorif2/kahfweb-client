@@ -27,20 +27,43 @@ import ContactPage from "./pages/ContactPage";
 import BlogPage from "./pages/BlogPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import NotFound from "./pages/NotFound";
+import HomeLayout from "./layouts/HomeLayout";
+import DashboardLayout from "./layouts/DashboardLayout";
+import ClientsTable from "./components/admin/ClientsTable";
+import OrdersTable from "./components/admin/OrdersTable";
+import UserLayout from "./layouts/UserLayout";
+import Profile from "./pagex/Profile";
+import ControlPanel from "./pagex/ControlPanel";
+import DashboardOverview from "./pagex/DashboardOverview";
+import AdminRoute from "./protectedRoute/AdminRoute";
+import { Provider, useDispatch } from "react-redux";
+import { store } from "./redux/store";
+import { useEffect } from "react";
+import { useGetUserQuery } from "./redux/features/auth/authApi";
+import { setUser } from "./redux/features/auth/authSlice";
+import PrivateRoute from "./protectedRoute/Privateroute";
+import Loader from "./components/loader/Loader";
+import CheckDomain from "./pagex/CheckDomain";
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+const App = () => {
+  const { data, isSuccess, isLoading } = useGetUserQuery();
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (isSuccess && data?.user) {
+      dispatch(setUser(data?.user));
+    }
+  }, [data?.user, dispatch, isSuccess]);
+  if (isLoading) return <Loader />;
+  return (
     <AuthProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <MainLayout>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<HomePage />} />
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<HomeLayout />}>
+              <Route index element={<HomePage />} />
               <Route path="/get-started" element={<GetStartedPage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
@@ -49,33 +72,63 @@ const App = () => (
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/domain-search" element={<CheckDomain />} />
+            </Route>
+            {/* auth routes */}
 
-              {/* User routes */}
-              <Route path="/dashboard" element={<UserDashboardPage />} />
-              <Route path="/control-panel" element={<UserControlPanel />} />
-              <Route path="/profile" element={<UserProfilePage />} />
-
-              {/* Admin routes */}
-              <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-              <Route path="/admin/clients" element={<AdminClientsPage />} />
-              <Route path="/admin/orders" element={<AdminOrdersPage />} />
-              <Route path="/admin/blog" element={<AdminBlogPage />} />
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <DashboardLayout />
+                </PrivateRoute>
+              }
+            >
+              <Route index element={<DashboardOverview />} />
+              <Route path="control-panel" element={<ControlPanel />} />
+              <Route path="profile" element={<Profile />} />
+              {/* admin only */}
               <Route
-                path="/admin/control-panel"
-                element={<AdminControlPanel />}
+                path="clients"
+                element={
+                  <AdminRoute>
+                    <ClientsTable />
+                  </AdminRoute>
+                }
               />
-              <Route path="/admin/profile" element={<AdminProfilePage />} />
-              <Route path="/admin/settings" element={<AdminSettingsPage />} />
+              <Route
+                path="orders"
+                element={
+                  <AdminRoute>
+                    <OrdersTable />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="blog"
+                element={
+                  <AdminRoute>
+                    <AdminBlogPage />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="settings"
+                element={
+                  <AdminRoute>
+                    <AdminSettingsPage />
+                  </AdminRoute>
+                }
+              />
+            </Route>
 
-              {/* 404 page */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </MainLayout>
+            {/* 404 page */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
-  </QueryClientProvider>
-);
+  );
+};
 
 export default App;

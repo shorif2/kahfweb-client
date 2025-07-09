@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Metadata } from "@/components/Metadata";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Search, CheckCircle, XCircle, Clock } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Search, CheckCircle, XCircle } from "lucide-react";
 
 const CheckDomain = () => {
   const location = useLocation();

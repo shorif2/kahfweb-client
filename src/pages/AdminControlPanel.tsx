@@ -1,9 +1,7 @@
-
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import ControlPanel from '@/components/general/ControlPanel';
-import { Metadata } from '@/components/Metadata';
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import ControlPanel from "@/components/general/ControlPanel";
+import { Metadata } from "@/components/Metadata";
 
 const AdminControlPanel = () => {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -20,7 +18,7 @@ const AdminControlPanel = () => {
 
   return (
     <>
-      <Metadata 
+      <Metadata
         title="Admin Control Panel - KahfWeb"
         description="Access the admin hosting control panel on KahfWeb."
       />

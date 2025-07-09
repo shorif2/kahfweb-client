@@ -24,8 +24,6 @@ const LoginForm = () => {
   const dispatch = useDispatch();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // setIsLoading(true);
-
     try {
       const res = await signIn({ email, password });
       if (res?.data?.Success) {
@@ -33,6 +31,7 @@ const LoginForm = () => {
         toast.success("Login successful!");
         navigate("/dashboard");
       } else {
+        console.log(res);
         toast.error("Invalid email or password");
       }
     } catch (error) {

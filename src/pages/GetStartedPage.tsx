@@ -1,24 +1,23 @@
-
-import React, { useState } from 'react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Card } from '@/components/ui/card';
-import LoginForm from '@/components/auth/LoginForm';
-import SignupForm from '@/components/auth/SignupForm';
-import { Metadata } from '@/components/Metadata';
+import { useState } from "react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
+import LoginForm from "@/components/auth/LoginForm";
+import SignupForm from "@/components/auth/SignupForm";
+import { Metadata } from "@/components/Metadata";
 
 const GetStartedPage = () => {
-  const [activeTab, setActiveTab] = useState('login');
-  
+  const [activeTab, setActiveTab] = useState("login");
+
   return (
     <>
-      <Metadata 
+      <Metadata
         title="Get Started - KahfWeb"
         description="Login or sign up to access your KahfWeb account and manage your domains and hosting services."
       />
       <div className="min-h-[calc(100vh-64px-153px)] bg-gray-50 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <Tabs 
-            value={activeTab} 
+          <Tabs
+            value={activeTab}
             onValueChange={(value) => setActiveTab(value)}
             className="w-full"
           >

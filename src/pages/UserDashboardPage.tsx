@@ -1,10 +1,8 @@
-
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import DashboardHeader from '@/components/user/DashboardHeader';
-import ServiceList from '@/components/user/ServiceList';
-import { useAuth } from '@/contexts/AuthContext';
-import { Metadata } from '@/components/Metadata';
+import { Navigate } from "react-router-dom";
+import DashboardHeader from "@/components/user/DashboardHeader";
+import ServiceList from "@/components/user/ServiceList";
+import { useAuth } from "@/contexts/AuthContext";
+import { Metadata } from "@/components/Metadata";
 
 const UserDashboardPage = () => {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -21,7 +19,7 @@ const UserDashboardPage = () => {
 
   return (
     <>
-      <Metadata 
+      <Metadata
         title="Dashboard - KahfWeb"
         description="Manage your domains and hosting services on the KahfWeb dashboard."
       />

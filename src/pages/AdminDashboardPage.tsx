@@ -1,10 +1,8 @@
-
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import AdminSidebar from '@/components/admin/Sidebar';
-import DashboardOverview from '@/components/admin/DashboardOverview';
-import { Metadata } from '@/components/Metadata';
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import AdminSidebar from "@/components/admin/Sidebar";
+import DashboardOverview from "@/components/admin/DashboardOverview";
+import { Metadata } from "@/components/Metadata";
 
 const AdminDashboardPage = () => {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -21,7 +19,7 @@ const AdminDashboardPage = () => {
 
   return (
     <>
-      <Metadata 
+      <Metadata
         title="Admin Dashboard - KahfWeb"
         description="KahfWeb administration dashboard for managing clients and services."
       />

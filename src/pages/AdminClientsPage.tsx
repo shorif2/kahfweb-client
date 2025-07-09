@@ -1,10 +1,8 @@
-
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import AdminSidebar from '@/components/admin/Sidebar';
-import ClientsTable from '@/components/admin/ClientsTable';
-import { Metadata } from '@/components/Metadata';
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import AdminSidebar from "@/components/admin/Sidebar";
+import ClientsTable from "@/components/admin/ClientsTable";
+import { Metadata } from "@/components/Metadata";
 
 const AdminClientsPage = () => {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -21,7 +19,7 @@ const AdminClientsPage = () => {
 
   return (
     <>
-      <Metadata 
+      <Metadata
         title="Manage Clients - KahfWeb Admin"
         description="Manage clients and their services on the KahfWeb admin panel."
       />

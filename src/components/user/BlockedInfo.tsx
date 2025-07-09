@@ -1,5 +1,3 @@
-import React from "react";
-
 const BlockedInfo = () => (
   <div className="max-w-md mx-auto mt-16 bg-white border border-red-200 shadow-lg rounded-xl p-8 flex flex-col items-center">
     <div className="bg-red-100 rounded-full p-3 mb-4">

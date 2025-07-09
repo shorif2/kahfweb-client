@@ -1,8 +1,7 @@
-
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -10,23 +9,23 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
+} from "@/components/ui/card";
+import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ProfileSettings = () => {
   const { user } = useAuth();
-  
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (newPassword !== confirmNewPassword) {
-      toast.error('New passwords do not match');
+      toast.error("New passwords do not match");
       return;
     }
 
@@ -35,15 +34,15 @@ const ProfileSettings = () => {
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmNewPassword('');
-      toast.success('Password updated successfully');
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      toast.success("Password updated successfully");
     }, 1000);
   };
 
   // Safe access to user.role with type checking
-  const userRole = user && 'role' in user ? user.role : 'customer';
+  const userRole = user && "role" in user ? user.role : "customer";
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -58,23 +57,28 @@ const ProfileSettings = () => {
           {/* User Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Account Information</h3>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="fullName">Full Name</Label>
-              <Input id="fullName" value={user?.fullName || ''} disabled />
+              <Input id="fullName" value={user?.fullName || ""} disabled />
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="email">Email Address</Label>
-              <Input id="email" type="email" value={user?.email || ''} disabled />
+              <Input
+                id="email"
+                type="email"
+                value={user?.email || ""}
+                disabled
+              />
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="role">Account Type</Label>
-              <Input 
-                id="role" 
-                value={userRole === 'admin' ? 'Administrator' : 'Customer'} 
-                disabled 
+              <Input
+                id="role"
+                value={userRole === "admin" ? "Administrator" : "Customer"}
+                disabled
               />
             </div>
           </div>
@@ -82,7 +86,7 @@ const ProfileSettings = () => {
           {/* Password Change Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <h3 className="text-lg font-medium">Change Password</h3>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="currentPassword">Current Password</Label>
               <Input
@@ -93,7 +97,7 @@ const ProfileSettings = () => {
                 required
               />
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="newPassword">New Password</Label>
               <Input
@@ -104,7 +108,7 @@ const ProfileSettings = () => {
                 required
               />
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
               <Input
@@ -115,15 +119,16 @@ const ProfileSettings = () => {
                 required
               />
             </div>
-            
+
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Updating...' : 'Update Password'}
+              {isLoading ? "Updating..." : "Update Password"}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="border-t bg-gray-50 px-6 py-4">
           <p className="text-xs text-gray-500">
-            For security reasons, changing your email address requires contacting customer support.
+            For security reasons, changing your email address requires
+            contacting customer support.
           </p>
         </CardFooter>
       </Card>

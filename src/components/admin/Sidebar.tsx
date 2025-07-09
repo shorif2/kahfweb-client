@@ -1,4 +1,3 @@
-import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   HomeIcon,
@@ -8,9 +7,9 @@ import {
   Settings,
   MonitorCog,
   ContactRound,
+  Undo2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 
@@ -49,13 +48,13 @@ const AdminSidebar = () => {
   ];
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 shadow-sm h-[calc(100vh)] overflow-y-auto">
+    <aside className="flex flex-col w-64 bg-white border-r border-gray-200 shadow-sm h-[calc(100vh)] overflow-y-auto">
       <div className="p-4">
         <Link to="/" className="text-lg font-semibold text-gray-700">
           {isAdmin ? "Admin Panel" : "User Panel"}
         </Link>
       </div>
-      <nav className="px-2 pt-2 pb-4">
+      <nav className="flex-1 px-2 pt-2 pb-4">
         <ul className="space-y-1">
           <li>
             <Link
@@ -124,6 +123,21 @@ const AdminSidebar = () => {
           </li>
         </ul>
       </nav>
+
+      <Link
+        to="/"
+        className={cn(
+          "flex items-center px-4 py-2.5 text-sm font-medium rounded-md mb-2",
+          isActive("/dashboard/profile")
+            ? "bg-kahf-blue text-white"
+            : "text-gray-700 hover:bg-gray-100"
+        )}
+      >
+        <span className="mr-3">
+          <Undo2 size={18} />
+        </span>
+        Back to Home
+      </Link>
     </aside>
   );
 };

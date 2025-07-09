@@ -1,7 +1,4 @@
-import React, { useState } from "react";
-import { Navigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import AdminSidebar from "@/components/admin/Sidebar";
+import { useState } from "react";
 import { Metadata } from "@/components/Metadata";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

@@ -11,7 +11,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 

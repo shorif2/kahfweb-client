@@ -1,4 +1,3 @@
-import React from "react";
 import HeroSection from "@/components/home/HeroSection";
 import FeatureCards from "@/components/home/FeatureCards";
 import ServiceCards from "@/components/home/ServiceCards";

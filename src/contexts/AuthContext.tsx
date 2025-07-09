@@ -1,8 +1,13 @@
-
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  ReactNode,
+} from "react";
 
 // Define user types
-export type UserRole = 'user' | 'admin';
+export type UserRole = "user" | "admin";
 
 export interface User {
   id: string;
@@ -27,17 +32,17 @@ interface AuthProviderProps {
 
 const DUMMY_USERS: User[] = [
   {
-    id: '1',
-    email: 'user@example.com',
-    fullName: 'John Doe',
-    role: 'user'
+    id: "1",
+    email: "user@example.com",
+    fullName: "John Doe",
+    role: "user",
   },
   {
-    id: '2', 
-    email: 'admin@example.com',
-    fullName: 'Admin User',
-    role: 'admin'
-  }
+    id: "2",
+    email: "admin@example.com",
+    fullName: "Admin User",
+    role: "admin",
+  },
 ];
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
@@ -45,7 +50,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     // Check if user is stored in localStorage
-    const storedUser = localStorage.getItem('kahfweb_user');
+    const storedUser = localStorage.getItem("kahfweb_user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
@@ -53,36 +58,40 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     // For now, using dummy authentication
-    const foundUser = DUMMY_USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
-    
+    const foundUser = DUMMY_USERS.find(
+      (u) => u.email.toLowerCase() === email.toLowerCase()
+    );
+
     if (foundUser) {
       setUser(foundUser);
-      localStorage.setItem('kahfweb_user', JSON.stringify(foundUser));
+      localStorage.setItem("kahfweb_user", JSON.stringify(foundUser));
       return true;
     }
-    
+
     return false;
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('kahfweb_user');
-    
+    localStorage.removeItem("kahfweb_user");
+
     // Directly navigate to /get-started without intermediate redirects
-    window.location.href = '/get-started';
+    window.location.href = "/get-started";
   };
 
   const isAuthenticated = !!user;
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === "admin";
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      login, 
-      logout, 
-      isAuthenticated,
-      isAdmin
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        isAuthenticated,
+        isAdmin,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -91,7 +100,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

@@ -55,7 +55,7 @@ const PaymentMethodManager = () => {
     isActive: false,
   });
   const [addPaymentMethod] = useAddPaymentMethodMutation();
-  const { data, isLoading } = useGetPaymentMethodQuery();
+  const { data, isLoading } = useGetPaymentMethodQuery(undefined);
   const [updatePaymentMethod] = useUpdatePaymentMethodMutation();
   const [deletePaymentMethod] = useDeletePaymentMethodMutation();
   const [updateStatus] = useUpdateStatusMutation();
@@ -117,7 +117,7 @@ const PaymentMethodManager = () => {
 
   const resetForm = () => {
     setCurrentMethod({
-      id: "",
+      _id: "",
       name: "",
       accountNumber: "",
       instructions: "",
