@@ -11,11 +11,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 const ProfileSettings = () => {
-  const { user } = useAuth();
-
+  const { user } = useSelector((state: RootState) => state.auth);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
@@ -41,9 +41,6 @@ const ProfileSettings = () => {
     }, 1000);
   };
 
-  // Safe access to user.role with type checking
-  const userRole = user && "role" in user ? user.role : "customer";
-
   return (
     <div className="max-w-2xl mx-auto">
       <Card>
@@ -60,7 +57,7 @@ const ProfileSettings = () => {
 
             <div className="grid gap-2">
               <Label htmlFor="fullName">Full Name</Label>
-              <Input id="fullName" value={user?.fullName || ""} disabled />
+              <Input id="fullName" value={user?.name || ""} disabled />
             </div>
 
             <div className="grid gap-2">
@@ -77,7 +74,7 @@ const ProfileSettings = () => {
               <Label htmlFor="role">Account Type</Label>
               <Input
                 id="role"
-                value={userRole === "admin" ? "Administrator" : "Customer"}
+                value={user?.role === "admin" ? "Administrator" : "Customer"}
                 disabled
               />
             </div>

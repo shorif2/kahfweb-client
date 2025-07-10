@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   HomeIcon,
   Users,
@@ -8,18 +8,20 @@ import {
   MonitorCog,
   ContactRound,
   Undo2,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { useLogoutMutation } from "@/redux/features/auth/authApi";
+import { toast } from "sonner";
 
 const AdminSidebar = () => {
-  // const { isAuthenticated, isAdmin } = useAuth();
+  const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
+  const [logout] = useLogoutMutation();
   const isAdmin = user?.role === "admin" ? true : false;
-
   const location = useLocation();
-
   const isActive = (path: string) => {
     return location.pathname === path;
   };
@@ -46,6 +48,11 @@ const AdminSidebar = () => {
       icon: <Settings size={18} />,
     },
   ];
+  const handleLogOut = () => {
+    logout({});
+    toast.success("Login successful!");
+    navigate("/");
+  };
 
   return (
     <aside className="flex flex-col w-64 bg-white border-r border-gray-200 shadow-sm h-[calc(100vh)] overflow-y-auto">
@@ -123,21 +130,36 @@ const AdminSidebar = () => {
           </li>
         </ul>
       </nav>
-
-      <Link
-        to="/"
-        className={cn(
-          "flex items-center px-4 py-2.5 text-sm font-medium rounded-md mb-2",
-          isActive("/dashboard/profile")
-            ? "bg-kahf-blue text-white"
-            : "text-gray-700 hover:bg-gray-100"
-        )}
-      >
-        <span className="mr-3">
-          <Undo2 size={18} />
-        </span>
-        Back to Home
-      </Link>
+      <nav className="px-2 pt-2 pb-4">
+        <ul className="flex w-full justify-between">
+          <li>
+            <Link
+              to="/"
+              className={cn(
+                "flex items-center px-4 py-2.5 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <span className="mr-3">
+                <Undo2 size={18} />
+              </span>
+              Home
+            </Link>
+          </li>
+          <li>
+            <button
+              onClick={handleLogOut}
+              className={cn(
+                "flex items-center px-4 py-2.5 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <span className="mr-3">
+                <LogOut size={18} />
+              </span>
+              Sign Out
+            </button>
+          </li>
+        </ul>
+      </nav>
     </aside>
   );
 };

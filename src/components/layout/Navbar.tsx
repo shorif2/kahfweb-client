@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
 import { RootState } from "@/redux/store";
 import {
   DropdownMenu,
@@ -9,13 +8,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Settings, Home } from "lucide-react";
+import { User, LogOut, Settings } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useLogoutMutation } from "@/redux/features/auth/authApi";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isAuthenticated, isAdmin } = useAuth();
   const { user } = useSelector((state: RootState) => state.auth);
   const [logout] = useLogoutMutation();
 
@@ -95,7 +93,7 @@ const Navbar = () => {
                         Profile Settings
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => logout()}>
+                    <DropdownMenuItem onClick={() => logout({})}>
                       <span className="flex items-center w-full">
                         <LogOut className="h-4 w-4 mr-2" />
                         Sign Out
@@ -200,7 +198,7 @@ const Navbar = () => {
               </>
             )}
 
-            {isAuthenticated ? (
+            {user ? (
               <>
                 <Link
                   to="/dashboard"
@@ -218,7 +216,7 @@ const Navbar = () => {
                 </Link>
                 <button
                   onClick={() => {
-                    logout();
+                    logout({});
                     setIsMobileMenuOpen(false);
                   }}
                   className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50"

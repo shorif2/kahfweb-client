@@ -11,7 +11,7 @@ import { Menu } from "lucide-react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 const DashboardLayout = () => {
-  const { data, isLoading, isSuccess } = useGetUserQuery();
+  const { data, isLoading } = useGetUserQuery();
   const location = useLocation();
   if (isLoading) return <Loader />;
   if (!data?.user)
@@ -47,6 +47,7 @@ const DashboardLayout = () => {
             <AdminSidebar />
           </div>
         </div>
+        {/* main content area */}
         <SidebarInset className="flex-1">
           <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-white px-4 ">
             <SidebarTrigger className="-ml-1 hidden lg:flex" />

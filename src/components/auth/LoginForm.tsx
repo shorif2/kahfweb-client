@@ -1,17 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { CardContent, CardFooter } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import {
-  useGetUserQuery,
-  useSignInMutation,
-} from "@/redux/features/auth/authApi";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+import { useSignInMutation } from "@/redux/features/auth/authApi";
+import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/features/auth/authSlice";
 
 const LoginForm = () => {
@@ -20,7 +15,6 @@ const LoginForm = () => {
   const [signIn, { isLoading, error }] = useSignInMutation();
 
   const navigate = useNavigate();
-  // const { user } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

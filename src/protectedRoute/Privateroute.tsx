@@ -8,8 +8,9 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { user } = useSelector((state: RootState) => state.auth);
   const location = useLocation();
 
-  if (isLoading) return <h1>Loading...</h1>;
-  if (!user) return <Navigate to="/" state={{ from: location }} replace />;
+  if (isLoading && !user) return <h1>Loading...</h1>;
+  if (!user && isLoading)
+    return <Navigate to="/" state={{ from: location }} replace />;
   return children;
 };
 
