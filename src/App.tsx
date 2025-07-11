@@ -23,24 +23,12 @@ import OrdersTable from "./components/admin/OrdersTable";
 import Profile from "./pagex/Profile";
 import ControlPanel from "./pagex/ControlPanel";
 import DashboardOverview from "./pagex/DashboardOverview";
-import AdminRoute from "./protectedRoute/AdminRoute";
-import { useDispatch } from "react-redux";
-import { useEffect } from "react";
-import { useGetUserQuery } from "./redux/features/auth/authApi";
-import { setUser } from "./redux/features/auth/authSlice";
-import PrivateRoute from "./protectedRoute/Privateroute";
-import Loader from "./components/loader/Loader";
 import CheckDomain from "./pagex/CheckDomain";
+import ForgetPasswordPage from "./pages/ForgetPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const App = () => {
-  const { data, isSuccess, isLoading } = useGetUserQuery();
-  const dispatch = useDispatch();
-  useEffect(() => {
-    if (isSuccess && data) {
-      dispatch(setUser(data?.user));
-    }
-  }, [data, dispatch, isSuccess]);
-  if (isLoading) return <Loader />;
   return (
     <TooltipProvider>
       <Toaster />
@@ -60,52 +48,26 @@ const App = () => {
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/domain-search" element={<CheckDomain />} />
           </Route>
-          {/* auth routes */}
 
+          {/* Auth routes */}
+          <Route path="/forget-password" element={<ForgetPasswordPage />} />
           <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <DashboardLayout />
-              </PrivateRoute>
-            }
-          >
-            <Route index element={<DashboardOverview />} />
-            <Route path="control-panel" element={<ControlPanel />} />
-            <Route path="profile" element={<Profile />} />
-            {/* admin only */}
-            <Route
-              path="clients"
-              element={
-                <AdminRoute>
-                  <ClientsTable />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="orders"
-              element={
-                <AdminRoute>
-                  <OrdersTable />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="blog"
-              element={
-                <AdminRoute>
-                  <AdminBlogPage />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="settings"
-              element={
-                <AdminRoute>
-                  <AdminSettingsPage />
-                </AdminRoute>
-              }
-            />
+            path="/reset-password/:token"
+            element={<ResetPasswordPage />}
+          />
+
+          {/* Protected Dashboard Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<DashboardLayout />}>
+              <Route index element={<DashboardOverview />} />
+              <Route path="control-panel" element={<ControlPanel />} />
+              <Route path="profile" element={<Profile />} />
+              {/* Admin only routes */}
+              <Route path="clients" element={<ClientsTable />} />
+              <Route path="orders" element={<OrdersTable />} />
+              <Route path="blog" element={<AdminBlogPage />} />
+              <Route path="settings" element={<AdminSettingsPage />} />
+            </Route>
           </Route>
 
           {/* 404 page */}

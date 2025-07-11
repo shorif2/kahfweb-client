@@ -14,5 +14,14 @@ export const apiSlice = createApi({
     //   return headers;
     // },
   }),
+  tagTypes: [
+    "paymentMethods",
+    "pricingPackages",
+    "activePricingPackages",
+    "Orders",
+    "allOrders",
+    "recentOrder",
+    "summary",
+  ],
   endpoints: () => ({}),
 });

@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
+import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -10,36 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import ChangePasswordForm from "@/components/user/ChangePasswordForm";
 
 const Profile = () => {
   const { user } = useSelector((state: RootState) => state.auth);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (newPassword !== confirmNewPassword) {
-      toast.error("New passwords do not match");
-      return;
-    }
-
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmNewPassword("");
-      toast.success("Password updated successfully");
-    }, 1000);
-  };
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -81,46 +56,9 @@ const Profile = () => {
           </div>
 
           {/* Password Change Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <h3 className="text-lg font-medium">Change Password</h3>
-
-            <div className="grid gap-2">
-              <Label htmlFor="currentPassword">Current Password</Label>
-              <Input
-                id="currentPassword"
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="newPassword">New Password</Label>
-              <Input
-                id="newPassword"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
-              <Input
-                id="confirmNewPassword"
-                type="password"
-                value={confirmNewPassword}
-                onChange={(e) => setConfirmNewPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Updating..." : "Update Password"}
-            </Button>
-          </form>
+          <div className="space-y-4">
+            <ChangePasswordForm />
+          </div>
         </CardContent>
         <CardFooter className="border-t bg-gray-50 px-6 py-4">
           <p className="text-xs text-gray-500">

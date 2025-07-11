@@ -135,7 +135,7 @@ const ServiceList = () => {
   };
 
   if (isLoading) return <Loader />;
-  if (data.orders.length === 0)
+  if (data?.orders?.length === 0)
     return (
       <h1 className="flex justify-start items-center mt-10 border p-4 w-max rounded bg-yellow-200 shadow">
         You don't have any order.

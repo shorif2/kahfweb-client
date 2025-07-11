@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,17 +13,18 @@ const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [signIn, { isLoading, error }] = useSignInMutation();
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const res = await signIn({ email, password });
       if (res?.data?.Success) {
-        dispatch(setUser(res.data.user));
+        dispatch(setUser(res.data.user)); // Save user data to Redux
+        localStorage.setItem("user", JSON.stringify(res.data.user));
         toast.success("Login successful!");
-        navigate("/dashboard");
+        navigate("/dashboard"); // Redirect to dashboard
       } else {
         console.log(res);
         toast.error("Invalid email or password");
@@ -31,8 +32,6 @@ const LoginForm = () => {
     } catch (error) {
       toast.error("An error occurred during login");
       console.error(error);
-    } finally {
-      // setIsLoading(false);
     }
   };
 
@@ -54,12 +53,12 @@ const LoginForm = () => {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
-              <a
-                href="/forgot-password"
+              <Link
+                to="/forget-password"
                 className="text-sm text-kahf-blue hover:underline"
               >
                 Forgot password?
-              </a>
+              </Link>
             </div>
             <Input
               id="password"

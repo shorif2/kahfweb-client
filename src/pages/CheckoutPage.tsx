@@ -38,12 +38,11 @@ const CheckoutPage = () => {
   const [createOrder, { isLoading }] = useCreateOrderMutation();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const [transactionId, setTransactionId] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [domainName, setDomainName] = useState(location.state?.domain || "");
-  const { data } = useGetActiveMethodQuery();
+  const { data } = useGetActiveMethodQuery(undefined);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
 
   const [formData, setFormData] = useState({
@@ -59,13 +58,17 @@ const CheckoutPage = () => {
   );
 
   // Get product from location state or use default
-  const selectedProduct: ProductType = location.state?.selectedProduct || {
-    name: "Domain Registration",
-    item: "domain",
-    price: 60.0,
-    description: "Register a new domain name",
-  };
-
+  const selectedProduct: ProductType = location.state?.selectedProduct
+    ? {
+        ...location.state.selectedProduct,
+        price: Number(location.state.selectedProduct.price),
+      }
+    : {
+        name: "Domain Registration",
+        item: "domain",
+        price: 60.0,
+        description: "Register a new domain name",
+      };
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -101,6 +104,7 @@ const CheckoutPage = () => {
       item: selectedProduct.item,
       price: selectedProduct.price,
       domain: domainName,
+
       transactionId,
     };
     const res = await createOrder(orderInfo);
@@ -228,7 +232,7 @@ const CheckoutPage = () => {
 
               <div className="flex justify-between py-2">
                 <span>Subtotal</span>
-                <span>${selectedProduct.price.toFixed(2)}</span>
+                <span>${selectedProduct?.price?.toFixed(2)}</span>
               </div>
 
               <div className="flex justify-between py-2 border-b">
@@ -238,7 +242,7 @@ const CheckoutPage = () => {
 
               <div className="flex justify-between py-4 font-semibold text-lg">
                 <span>Total</span>
-                <span>${selectedProduct.price.toFixed(2)}</span>
+                <span>${selectedProduct?.price?.toFixed(2)}</span>
               </div>
             </div>
 
@@ -252,15 +256,15 @@ const CheckoutPage = () => {
                     <div
                       key={method._id}
                       className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                        selectedPayment === method.id
+                        selectedPayment === method._id
                           ? "border-kahf-blue bg-blue-50"
                           : "hover:border-gray-400"
                       }`}
-                      onClick={() => setSelectedPayment(method.id)}
+                      onClick={() => setSelectedPayment(method._id)}
                     >
                       <div className="flex items-center mb-4">
                         <div className="h-5 w-5 rounded-full border-2 border-gray-300 flex items-center justify-center mr-3">
-                          {selectedPayment === method.id && (
+                          {selectedPayment === method._id && (
                             <div className="h-3 w-3 rounded-full bg-kahf-blue" />
                           )}
                         </div>
@@ -282,7 +286,7 @@ const CheckoutPage = () => {
                         </div>
                       </div>
 
-                      {selectedPayment === method.id && (
+                      {selectedPayment === method._id && (
                         <div className="pl-8 space-y-4">
                           <div className="flex flex-col md:flex-row md:items-center gap-4">
                             <div className="flex-1 space-y-4">
@@ -292,7 +296,7 @@ const CheckoutPage = () => {
                                   readOnly
                                   className="bg-gray-50"
                                   ref={(el) =>
-                                    (accountNumberRefs.current[method.id] = el)
+                                    (accountNumberRefs.current[method._id] = el)
                                   }
                                 />
                                 <Button
@@ -329,11 +333,11 @@ const CheckoutPage = () => {
                               )}
 
                               <div>
-                                <Label htmlFor={`txn-${method.id}`}>
+                                <Label htmlFor={`txn-${method._id}`}>
                                   Transaction ID
                                 </Label>
                                 <Input
-                                  id={`txn-${method.id}`}
+                                  id={`txn-${method._id}`}
                                   value={transactionId}
                                   onChange={(e) =>
                                     setTransactionId(e.target.value)

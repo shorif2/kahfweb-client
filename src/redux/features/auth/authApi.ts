@@ -23,6 +23,21 @@ type LoginResponse = {
 type registerResposne = {
   message: string;
 };
+
+type ForgetPasswordRequest = {
+  email: string;
+};
+
+type ResetPasswordRequest = {
+  token: string;
+  newPassword: string;
+};
+
+type ChangePasswordRequest = {
+  currentPassword: string;
+  newPassword: string;
+};
+
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     signIn: builder.mutation<LoginResponse, LoginRequest, user>({
@@ -48,6 +63,33 @@ export const authApi = apiSlice.injectEndpoints({
         body: credentials,
       }),
       invalidatesTags: ["Users", "summary"],
+    }),
+    forgetPassword: builder.mutation<
+      { message: string },
+      ForgetPasswordRequest
+    >({
+      query: (data) => ({
+        url: "/api/auth/forget-password",
+        method: "POST",
+        body: data,
+      }),
+    }),
+    resetPassword: builder.mutation<{ message: string }, ResetPasswordRequest>({
+      query: (data) => ({
+        url: "/api/auth/reset-password",
+        method: "POST",
+        body: data,
+      }),
+    }),
+    changePassword: builder.mutation<
+      { message: string },
+      ChangePasswordRequest
+    >({
+      query: (data) => ({
+        url: "/api/auth/change-password",
+        method: "POST",
+        body: data,
+      }),
     }),
     updateClient: builder.mutation<any, user>({
       query: ({ userId, editFormData }) => ({
@@ -96,6 +138,9 @@ export const {
   useGetUserQuery,
   useLogoutMutation,
   useRegisterMutation,
+  useForgetPasswordMutation,
+  useResetPasswordMutation,
+  useChangePasswordMutation,
   useAllUsersQuery,
   useUpdateClientMutation,
   useBlockUserMutation,

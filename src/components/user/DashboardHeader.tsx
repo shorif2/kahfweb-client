@@ -2,34 +2,27 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
+import { useGetPricingPackagesQuery } from "@/redux/features/pricing/pricingApi";
+
 const DashboardHeader = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
+  const { data: pricingData } = useGetPricingPackagesQuery();
 
   const handlePurchase = (type: string) => {
-    const products = {
-      domain: {
-        name: "Domain Registration",
-        item: "domain",
-        price: 60.0,
-        description: "Register a new domain name",
-      },
-      hosting: {
-        name: "Premium Hosting (1 Year)",
-        item: "hosting",
-        price: 60.0,
-        description: "High performance web hosting with unlimited bandwidth",
-      },
-      bundle: {
-        name: "Hosting + Domain Bundle",
-        item: "bundle",
-        price: 99.0,
-        description: "Domain registration with premium hosting package",
-      },
-    };
+    const packageData = pricingData?.data?.find(
+      (pkg) => pkg.packageType === type
+    );
 
-    const selectedProduct = products[type as keyof typeof products];
-    navigate("/checkout", { state: { selectedProduct } });
+    if (packageData) {
+      const selectedProduct = {
+        name: packageData.title,
+        item: packageData.packageType,
+        price: packageData.price,
+        description: packageData.features.map((f) => f.text).join(", "),
+      };
+      navigate("/checkout", { state: { selectedProduct } });
+    }
   };
 
   return (

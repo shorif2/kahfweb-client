@@ -6,16 +6,10 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { useGetUserQuery } from "@/redux/features/auth/authApi";
 import { Menu } from "lucide-react";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
 const DashboardLayout = () => {
-  const { data, isLoading } = useGetUserQuery();
-  const location = useLocation();
-  if (isLoading) return <Loader />;
-  if (!data?.user)
-    return <Navigate to="/" state={{ from: location }} replace />;
   return (
     <SidebarProvider className="bg-red-100">
       {/* min-h-[calc(100vh-64px)]  */}
@@ -49,21 +43,23 @@ const DashboardLayout = () => {
         </div>
         {/* main content area */}
         <SidebarInset className="flex-1">
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-white px-4 ">
-            <SidebarTrigger className="-ml-1 hidden lg:flex" />
-            <button
-              className="lg:hidden"
-              onClick={() => {
-                const overlay = document.getElementById(
-                  "mobile-sidebar-overlay"
-                );
-                if (overlay) overlay.classList.remove("hidden");
-              }}
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-            <div className="flex-1" />
-            <div className="text-sm text-gray-600 ">Dashboard</div>
+          <header className="">
+            <div className="flex h-16 shrink-0 items-center gap-2 border-b bg-white px-4 ">
+              <SidebarTrigger className="-ml-1 hidden lg:flex" />
+              <button
+                className="lg:hidden"
+                onClick={() => {
+                  const overlay = document.getElementById(
+                    "mobile-sidebar-overlay"
+                  );
+                  if (overlay) overlay.classList.remove("hidden");
+                }}
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+              <div className="flex-1" />
+              <div className="text-sm text-gray-600 ">Dashboard</div>
+            </div>
           </header>
           <div className="flex-1 p-6 overflow-y-auto bg-gray-50">
             <Outlet />
