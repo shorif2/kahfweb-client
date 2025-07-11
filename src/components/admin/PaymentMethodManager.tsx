@@ -59,7 +59,6 @@ const PaymentMethodManager = () => {
   const [updatePaymentMethod] = useUpdatePaymentMethodMutation();
   const [deletePaymentMethod] = useDeletePaymentMethodMutation();
   const [updateStatus] = useUpdateStatusMutation();
-  console.log(data);
   // File input references
   const logoInputRef = React.useRef<HTMLInputElement>(null);
   const qrCodeInputRef = React.useRef<HTMLInputElement>(null);
@@ -176,7 +175,6 @@ const PaymentMethodManager = () => {
     e.preventDefault();
     try {
       if (isEditing) {
-        console.log(currentMethod?._id);
         const res = await updatePaymentMethod({
           currentMethod,
           id: currentMethod?._id,
@@ -189,29 +187,32 @@ const PaymentMethodManager = () => {
           });
         }
         return;
-      }
-      const res = await addPaymentMethod(currentMethod);
-
-      if (res?.data?.success) {
-        toast({
-          title: "Payment Method Added",
-          description: `${currentMethod.name} as a payment method has been added successfully.`,
-        });
-        console.log(res);
-      } else if (res?.error) {
-        console.log(res);
-        toast({
-          title: "Error",
-          description: res?.error?.data?.message,
-          variant: "destructive",
-        });
       } else {
-        toast({
-          title: "Error",
-          description: "Something went wrong",
-          variant: "destructive",
-        });
+        const { _id, ...newMethod } = currentMethod;
+        const res = await addPaymentMethod(newMethod);
+
+        if (res?.data?.success) {
+          toast({
+            title: "Payment Method Added",
+            description: `${currentMethod.name} as a payment method has been added successfully.`,
+          });
+          console.log(res);
+        } else if (res?.error) {
+          console.log(res);
+          toast({
+            title: "Error",
+            description: res?.error?.data?.message,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Something went wrong",
+            variant: "destructive",
+          });
+        }
       }
+
       // resetForm();
       // toast({
       //   title: "Payment Method Added",
